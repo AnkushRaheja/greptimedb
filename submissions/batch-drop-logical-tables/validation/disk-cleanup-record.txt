@@ -1,0 +1,27 @@
+Mon Sep 28 04:42:04 UTC 2026
+--- df
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda        252G   34G  3.8G  90% /
+--- du
+23G	/home/user/greptimedb-target
+980M	/root/.cargo/registry
+380M	/home/user/greptimedb/.git
+--- running cargo/rustc
+none
+=== verification Mon Sep 28 04:43:18 UTC 2026
+target dir inside git repo? no
+running cargo/rustc: 0
+ea96 dep-info source root: /home/user/greptimedb/.claude/worktrees/agent-a95443a3b78c355e4
+Candidate 2 agent worktree still present? no (removed)
+=== files to delete
+-rw-r--r-- 1 root root      33195 Sep 28 03:32 /home/user/greptimedb-target/debug/deps/common_meta-ea96e833fb159ad8.d
+-rwxr-xr-x 1 root root 1237207384 Sep 28 03:34 /home/user/greptimedb-target/debug/deps/flow_partitions_repro-edf5f0f28c7ddb0b
+-rw-r--r-- 1 root root        306 Sep 28 03:34 /home/user/greptimedb-target/debug/deps/flow_partitions_repro-edf5f0f28c7ddb0b.d
+-rw-r--r-- 1 root root  366401880 Sep 28 03:34 /home/user/greptimedb-target/debug/deps/libcommon_meta-ea96e833fb159ad8.rlib
+-rw-r--r-- 2 root root   20123593 Sep 28 03:33 /home/user/greptimedb-target/debug/deps/libcommon_meta-ea96e833fb159ad8.rmeta
+-rwxr-xr-x 1 root root 2014425064 Sep 28 03:50 /home/user/greptimedb-target/debug/deps/query-25dfc97ac071af4d
+-rw-r--r-- 1 root root       9428 Sep 28 03:47 /home/user/greptimedb-target/debug/deps/query-25dfc97ac071af4d.d
+deleted
+Mon Sep 28 04:43:18 UTC 2026
+/dev/vda        252G   30G  7.1G  81% /
+20G	/home/user/greptimedb-target

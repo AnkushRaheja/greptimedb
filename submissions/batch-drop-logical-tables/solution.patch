@@ -1,0 +1,670 @@
+diff --git a/src/common/meta/src/ddl.rs b/src/common/meta/src/ddl.rs
+index f70ba2b386..a594e990cd 100644
+--- a/src/common/meta/src/ddl.rs
++++ b/src/common/meta/src/ddl.rs
+@@ -42,6 +42,7 @@ pub(crate) use create_table::{CreateRequestBuilder, build_template_from_raw_tabl
+ pub mod create_view;
+ pub mod drop_database;
+ pub mod drop_flow;
++pub mod drop_logical_tables;
+ pub mod drop_table;
+ pub mod drop_view;
+ pub(crate) mod event;
+diff --git a/src/common/meta/src/ddl/drop_logical_tables.rs b/src/common/meta/src/ddl/drop_logical_tables.rs
+new file mode 100644
+index 0000000000..d0c2ddd90e
+--- /dev/null
++++ b/src/common/meta/src/ddl/drop_logical_tables.rs
+@@ -0,0 +1,430 @@
++// Copyright 2023 Greptime Team
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++
++use std::collections::HashSet;
++
++use async_trait::async_trait;
++use common_error::ext::BoxedError;
++use common_procedure::error::{ExternalSnafu, FromJsonSnafu, ToJsonSnafu};
++use common_procedure::{
++    Context as ProcedureContext, LockKey, Procedure, Result as ProcedureResult, Status,
++};
++use common_telemetry::info;
++use futures::future::try_join_all;
++use serde::{Deserialize, Serialize};
++use snafu::{OptionExt, ResultExt, ensure};
++use strum::AsRefStr;
++use table::metadata::TableId;
++use table::table_name::TableName;
++
++use crate::cache_invalidator::Context as CacheContext;
++use crate::ddl::DdlContext;
++use crate::ddl::drop_table::executor::DropTableExecutor;
++use crate::ddl::utils::{convert_region_routes_to_detecting_regions, map_to_procedure_error};
++use crate::error::{self, Result};
++use crate::instruction::CacheIdent;
++use crate::key::table_name::TableNameKey;
++use crate::key::table_route::TableRouteValue;
++use crate::lock_key::{CatalogLock, SchemaLock, TableLock, TableNameLock};
++use crate::metrics;
++use crate::region_keeper::OperatingRegionGuard;
++use crate::rpc::ddl::DropTableTask;
++use crate::rpc::router::{RegionRoute, operating_leader_region_roles};
++
++/// Drops logical tables of the same physical table in a single procedure.
++///
++/// All the tasks are validated before any metadata is deleted. The logical tables
++/// share the physical regions, so the physical regions are registered as operating
++/// only once for the whole batch.
++pub struct DropLogicalTablesProcedure {
++    pub context: DdlContext,
++    pub data: DropLogicalTablesData,
++    /// The guards of the physical regions hosting the dropping logical regions.
++    pub(crate) dropping_regions: Vec<OperatingRegionGuard>,
++}
++
++impl DropLogicalTablesProcedure {
++    pub const TYPE_NAME: &'static str = "metasrv-procedure::DropLogicalTables";
++
++    pub fn new(
++        tasks: Vec<DropTableTask>,
++        physical_table_id: Option<TableId>,
++        context: DdlContext,
++    ) -> Self {
++        Self {
++            context,
++            data: DropLogicalTablesData {
++                state: DropLogicalTablesState::Prepare,
++                tasks,
++                physical_table_id,
++                tables: vec![],
++                physical_region_routes: vec![],
++            },
++            dropping_regions: vec![],
++        }
++    }
++
++    pub fn from_json(json: &str, context: DdlContext) -> ProcedureResult<Self> {
++        let data = serde_json::from_str(json).context(FromJsonSnafu)?;
++        Ok(Self {
++            context,
++            data,
++            dropping_regions: vec![],
++        })
++    }
++
++    /// Validates all the tasks and resolves the logical tables to drop.
++    ///
++    /// - Skips the missing tables if `drop_if_exists` is `true`, otherwise fails the batch.
++    /// - Skips the duplicate tables.
++    /// - Ensures all the tables are logical tables of the locked physical table.
++    pub(crate) async fn on_prepare(&mut self) -> Result<Status> {
++        let table_name_keys = self
++            .data
++            .tasks
++            .iter()
++            .map(|task| TableNameKey::new(&task.catalog, &task.schema, &task.table))
++            .collect::<Vec<_>>();
++        let table_name_values = self
++            .context
++            .table_metadata_manager
++            .table_name_manager()
++            .batch_get(table_name_keys)
++            .await?;
++
++        let mut dropping_table_ids = HashSet::with_capacity(self.data.tasks.len());
++        let mut tables = Vec::with_capacity(self.data.tasks.len());
++        for (task, value) in self.data.tasks.iter().zip(table_name_values) {
++            let Some(value) = value else {
++                ensure!(
++                    task.drop_if_exists,
++                    error::TableNotFoundSnafu {
++                        table_name: task.table_ref().to_string(),
++                    }
++                );
++                continue;
++            };
++            // Locks are fixed at submission, the table may be recreated in between.
++            ensure!(
++                value.table_id() == task.table_id,
++                error::UnexpectedSnafu {
++                    err_msg: format!(
++                        "table {} (id {}) is not covered by the procedure locks; retry the statement",
++                        task.table_ref(),
++                        value.table_id()
++                    ),
++                }
++            );
++            if dropping_table_ids.insert(task.table_id) {
++                tables.push(task.clone());
++            }
++        }
++
++        if tables.is_empty() {
++            info!("No logical table to drop, all the tables are not found");
++            return Ok(Status::done());
++        }
++
++        let table_ids = tables.iter().map(|task| task.table_id).collect::<Vec<_>>();
++        let table_routes = self
++            .context
++            .table_metadata_manager
++            .table_route_manager()
++            .table_route_storage()
++            .batch_get(&table_ids)
++            .await?;
++        let mut physical_table_id = None;
++        for (task, table_route) in tables.iter().zip(table_routes) {
++            let table_route = table_route.context(error::TableRouteNotFoundSnafu {
++                table_id: task.table_id,
++            })?;
++            let TableRouteValue::Logical(table_route) = table_route else {
++                return error::DropLogicalTablesInvalidArgumentsSnafu {
++                    err_msg: format!("table {} is not a logical table", task.table_ref()),
++                }
++                .fail();
++            };
++            let current = table_route.physical_table_id();
++            match physical_table_id {
++                None => physical_table_id = Some(current),
++                Some(physical_table_id) => ensure!(
++                    physical_table_id == current,
++                    error::DropLogicalTablesInvalidArgumentsSnafu {
++                        err_msg: "All the tables should have the same physical table id",
++                    }
++                ),
++            }
++        }
++        // Safety: `tables` is not empty.
++        let physical_table_id = physical_table_id.unwrap();
++        ensure!(
++            self.data.physical_table_id == Some(physical_table_id),
++            error::UnexpectedSnafu {
++                err_msg: format!(
++                    "physical table {physical_table_id} is not covered by the procedure locks; retry the statement"
++                ),
++            }
++        );
++
++        let (_, physical_table_route) = self
++            .context
++            .table_metadata_manager
++            .table_route_manager()
++            .get_physical_table_route(physical_table_id)
++            .await?;
++
++        self.data.tables = tables;
++        self.data.physical_region_routes = physical_table_route.region_routes;
++        self.data.state = DropLogicalTablesState::DeleteMetadata;
++        Ok(Status::executing(true))
++    }
++
++    /// Registers the physical regions as operating if they are not registered.
++    fn register_dropping_regions(&mut self) -> Result<()> {
++        if !self.dropping_regions.is_empty() {
++            return Ok(());
++        }
++
++        let dropping_regions = operating_leader_region_roles(&self.data.physical_region_routes);
++        let mut dropping_region_guards = Vec::with_capacity(dropping_regions.len());
++        for (region_id, datanode_id, role) in dropping_regions {
++            let guard = self
++                .context
++                .memory_region_keeper
++                .register_with_role(datanode_id, region_id, role)
++                .context(error::RegionOperatingRaceSnafu {
++                    region_id,
++                    peer_id: datanode_id,
++                })?;
++            dropping_region_guards.push(guard);
++        }
++
++        self.dropping_regions = dropping_region_guards;
++        Ok(())
++    }
++
++    pub(crate) async fn on_delete_metadata(&mut self) -> Result<Status> {
++        self.register_dropping_regions()?;
++        let physical_table_id = self.data.physical_table_id()?;
++        let tables = self.data.table_ids_and_names();
++        self.context
++            .table_metadata_manager
++            .delete_logical_tables_metadata(physical_table_id, &tables)
++            .await?;
++        info!(
++            "Deleted metadata for logical tables {:?} of physical table {physical_table_id}",
++            tables
++                .iter()
++                .map(|(table_id, _)| table_id)
++                .collect::<Vec<_>>()
++        );
++
++        self.data.state = DropLogicalTablesState::InvalidateTableCache;
++        Ok(Status::executing(true))
++    }
++
++    async fn on_invalidate_table_cache(&mut self) -> Result<Status> {
++        let cache_idents = self
++            .data
++            .tables
++            .iter()
++            .flat_map(|task| {
++                [
++                    CacheIdent::TableName(task.table_name()),
++                    CacheIdent::TableId(task.table_id),
++                ]
++            })
++            .collect::<Vec<_>>();
++        let ctx = CacheContext {
++            subject: Some(format!(
++                "Invalidate table cache by dropping logical tables, physical_table_id: {:?}",
++                self.data.physical_table_id,
++            )),
++        };
++        self.context
++            .cache_invalidator
++            .invalidate(&ctx, &cache_idents)
++            .await?;
++
++        self.data.state = DropLogicalTablesState::DatanodeDropRegions;
++        Ok(Status::executing(true))
++    }
++
++    async fn on_datanode_drop_regions(&mut self, retrying: bool) -> Result<Status> {
++        if retrying {
++            // The peer addresses may change during retries,
++            // so we always remap the region routes.
++            self.context
++                .table_metadata_manager
++                .table_route_manager()
++                .table_route_storage()
++                .remap_region_routes(&mut self.data.physical_region_routes)
++                .await?;
++        }
++
++        let region_routes = &self.data.physical_region_routes;
++        let node_manager = &self.context.node_manager;
++        let leader_region_registry = &self.context.leader_region_registry;
++        let drop_regions = self.data.tables.iter().map(|task| {
++            let executor =
++                DropTableExecutor::new(task.table_name(), task.table_id, task.drop_if_exists);
++            async move {
++                executor
++                    .on_drop_regions(
++                        node_manager,
++                        leader_region_registry,
++                        region_routes,
++                        false,
++                        false,
++                        false,
++                    )
++                    .await
++            }
++        });
++        try_join_all(drop_regions).await?;
++        self.context
++            .deregister_failure_detectors(convert_region_routes_to_detecting_regions(region_routes))
++            .await;
++
++        self.data.state = DropLogicalTablesState::DeleteTombstone;
++        Ok(Status::executing(true))
++    }
++
++    async fn on_delete_metadata_tombstone(&mut self) -> Result<Status> {
++        let physical_table_id = self.data.physical_table_id()?;
++        let tables = self.data.table_ids_and_names();
++        self.context
++            .table_metadata_manager
++            .delete_logical_tables_metadata_tombstone(physical_table_id, &tables)
++            .await?;
++
++        self.dropping_regions.clear();
++        Ok(Status::done())
++    }
++}
++
++#[async_trait]
++impl Procedure for DropLogicalTablesProcedure {
++    fn type_name(&self) -> &str {
++        Self::TYPE_NAME
++    }
++
++    fn recover(&mut self) -> ProcedureResult<()> {
++        // Only registers regions if the metadata is deleted.
++        let register_operating_regions = matches!(
++            self.data.state,
++            DropLogicalTablesState::DeleteMetadata
++                | DropLogicalTablesState::InvalidateTableCache
++                | DropLogicalTablesState::DatanodeDropRegions
++        );
++        if register_operating_regions {
++            self.register_dropping_regions()
++                .map_err(BoxedError::new)
++                .context(ExternalSnafu {
++                    clean_poisons: false,
++                })?;
++        }
++
++        Ok(())
++    }
++
++    async fn execute(&mut self, ctx: &ProcedureContext) -> ProcedureResult<Status> {
++        let state = &self.data.state;
++        let _timer = metrics::METRIC_META_PROCEDURE_DROP_TABLES
++            .with_label_values(&[state.as_ref()])
++            .start_timer();
++
++        match self.data.state {
++            DropLogicalTablesState::Prepare => self.on_prepare().await,
++            DropLogicalTablesState::DeleteMetadata => self.on_delete_metadata().await,
++            DropLogicalTablesState::InvalidateTableCache => self.on_invalidate_table_cache().await,
++            DropLogicalTablesState::DatanodeDropRegions => {
++                let retrying = ctx.is_retrying().await.unwrap_or(false);
++                self.on_datanode_drop_regions(retrying).await
++            }
++            DropLogicalTablesState::DeleteTombstone => self.on_delete_metadata_tombstone().await,
++        }
++        .map_err(map_to_procedure_error)
++    }
++
++    fn dump(&self) -> ProcedureResult<String> {
++        serde_json::to_string(&self.data).context(ToJsonSnafu)
++    }
++
++    fn lock_key(&self) -> LockKey {
++        // CatalogLock, SchemaLock,
++        // TableNameLock(s), TableLock(s)
++        let mut lock_key = Vec::with_capacity(4 * self.data.tasks.len() + 1);
++        for task in &self.data.tasks {
++            lock_key.push(CatalogLock::Read(&task.catalog).into());
++            lock_key.push(SchemaLock::read(&task.catalog, &task.schema).into());
++            lock_key.push(TableNameLock::new(&task.catalog, &task.schema, &task.table).into());
++            lock_key.push(TableLock::Write(task.table_id).into());
++        }
++        // Prevents the physical table from being dropped. The physical table itself
++        // can't be a target of the batch, it will be rejected in `Prepare`.
++        if let Some(physical_table_id) = self.data.physical_table_id
++            && self
++                .data
++                .tasks
++                .iter()
++                .all(|task| task.table_id != physical_table_id)
++        {
++            lock_key.push(TableLock::Read(physical_table_id).into());
++        }
++
++        LockKey::new(lock_key)
++    }
++}
++
++#[derive(Debug, Serialize, Deserialize)]
++pub struct DropLogicalTablesData {
++    pub state: DropLogicalTablesState,
++    pub tasks: Vec<DropTableTask>,
++    /// The physical table resolved at submission.
++    pub physical_table_id: Option<TableId>,
++    /// The deduplicated logical tables to drop, resolved in `Prepare`.
++    pub tables: Vec<DropTableTask>,
++    pub physical_region_routes: Vec<RegionRoute>,
++}
++
++impl DropLogicalTablesData {
++    fn physical_table_id(&self) -> Result<TableId> {
++        self.physical_table_id.context(error::UnexpectedSnafu {
++            err_msg: "physical table id is missing in the drop logical tables procedure",
++        })
++    }
++
++    fn table_ids_and_names(&self) -> Vec<(TableId, TableName)> {
++        self.tables
++            .iter()
++            .map(|task| (task.table_id, task.table_name()))
++            .collect()
++    }
++}
++
++/// The state of drop logical tables.
++#[derive(Debug, Serialize, Deserialize, AsRefStr, PartialEq)]
++pub enum DropLogicalTablesState {
++    /// Validates the tasks and resolves the logical tables
++    Prepare,
++    /// Deletes metadata logically
++    DeleteMetadata,
++    /// Invalidates table cache
++    InvalidateTableCache,
++    /// Drops logical regions on Datanode
++    DatanodeDropRegions,
++    /// Deletes metadata tombstone permanently
++    DeleteTombstone,
++}
+diff --git a/src/common/meta/src/ddl_manager.rs b/src/common/meta/src/ddl_manager.rs
+index eddb414876..9fad208a40 100644
+--- a/src/common/meta/src/ddl_manager.rs
++++ b/src/common/meta/src/ddl_manager.rs
+@@ -47,6 +47,7 @@ use crate::ddl::create_table::CreateTableProcedure;
+ use crate::ddl::create_view::CreateViewProcedure;
+ use crate::ddl::drop_database::DropDatabaseProcedure;
+ use crate::ddl::drop_flow::DropFlowProcedure;
++use crate::ddl::drop_logical_tables::DropLogicalTablesProcedure;
+ use crate::ddl::drop_table::DropTableProcedure;
+ use crate::ddl::drop_view::DropViewProcedure;
+ #[cfg(feature = "enterprise")]
+@@ -330,6 +331,7 @@ impl DdlManager {
+             AlterLogicalTablesProcedure,
+             AlterDatabaseProcedure,
+             DropTableProcedure,
++            DropLogicalTablesProcedure,
+             DropFlowProcedure,
+             TruncateTableProcedure,
+             DropDatabaseProcedure,
+@@ -654,6 +656,50 @@ impl DdlManager {
+         self.execute_procedure_and_wait(procedure_with_id).await
+     }
+ 
++    /// Submits and executes a drop logical tables task.
++    #[tracing::instrument(skip_all)]
++    pub async fn submit_drop_logical_table_tasks(
++        &self,
++        drop_table_tasks: Vec<DropTableTask>,
++        procedure_context: ProcedureContext,
++    ) -> Result<(ProcedureId, Option<Output>)> {
++        let context = self.create_context();
++
++        // Procedure locks are fixed at submission, so resolve the physical table
++        // from the first existing table. The procedure verifies that all the
++        // tables belong to it.
++        let table_name_keys = drop_table_tasks
++            .iter()
++            .map(|task| TableNameKey::new(&task.catalog, &task.schema, &task.table))
++            .collect::<Vec<_>>();
++        let first_table_id = self
++            .table_metadata_manager()
++            .table_name_manager()
++            .batch_get(table_name_keys)
++            .await?
++            .into_iter()
++            .flatten()
++            .map(|value| value.table_id())
++            .next();
++        let physical_table_id = match first_table_id {
++            Some(table_id) => Some(
++                self.table_metadata_manager()
++                    .table_route_manager()
++                    .get_physical_table_id(table_id)
++                    .await?,
++            ),
++            None => None,
++        };
++
++        let procedure =
++            DropLogicalTablesProcedure::new(drop_table_tasks, physical_table_id, context);
++
++        let procedure_with_id =
++            ProcedureWithId::with_random_id(Box::new(procedure)).with_context(procedure_context);
++
++        self.execute_procedure_and_wait(procedure_with_id).await
++    }
++
+     /// Submits and executes an undrop table task.
+     #[cfg_attr(not(feature = "enterprise"), allow(unused_variables))]
+     #[tracing::instrument(skip_all)]
+@@ -1001,7 +1047,9 @@ impl DdlManager {
+                     handle_alter_logical_table_tasks(self, alter_table_tasks, procedure_context)
+                         .await
+                 }
+-                DropLogicalTables(_) => todo!(),
++                DropLogicalTables(drop_table_tasks) => {
++                    handle_drop_logical_table_tasks(self, drop_table_tasks, procedure_context).await
++                }
+                 CreateDatabase(create_database_task) => {
+                     handle_create_database_task(self, create_database_task, procedure_context).await
+                 }
+@@ -1553,6 +1601,31 @@ async fn handle_alter_logical_table_tasks(
+     })
+ }
+ 
++async fn handle_drop_logical_table_tasks(
++    ddl_manager: &DdlManager,
++    drop_table_tasks: Vec<DropTableTask>,
++    procedure_context: ProcedureContext,
++) -> Result<SubmitDdlTaskResponse> {
++    ensure!(
++        !drop_table_tasks.is_empty(),
++        EmptyDdlTasksSnafu {
++            name: "drop logical tables"
++        }
++    );
++    let num_logical_tables = drop_table_tasks.len();
++
++    let (id, _) = ddl_manager
++        .submit_drop_logical_table_tasks(drop_table_tasks, procedure_context)
++        .await?;
++
++    info!("{num_logical_tables} logical tables are dropped via procedure_id {id:?}");
++
++    Ok(SubmitDdlTaskResponse {
++        key: id.to_string().into(),
++        ..Default::default()
++    })
++}
++
+ /// Handle the `[CreateViewTask]` and returns the DDL response when success.
+ async fn handle_create_view_task(
+     ddl_manager: &DdlManager,
+diff --git a/src/common/meta/src/error.rs b/src/common/meta/src/error.rs
+index 3f4868ffba..7727b012b9 100644
+--- a/src/common/meta/src/error.rs
++++ b/src/common/meta/src/error.rs
+@@ -717,6 +717,13 @@ pub enum Error {
+         location: Location,
+     },
+ 
++    #[snafu(display("Drop logical tables invalid arguments: {}", err_msg))]
++    DropLogicalTablesInvalidArguments {
++        err_msg: String,
++        #[snafu(implicit)]
++        location: Location,
++    },
++
+     #[snafu(display("Invalid node info key: {}", key))]
+     InvalidNodeInfoKey {
+         key: String,
+@@ -1259,6 +1266,7 @@ impl ErrorExt for Error {
+             | EmptyKey { .. }
+             | AlterLogicalTablesInvalidArguments { .. }
+             | CreateLogicalTablesInvalidArguments { .. }
++            | DropLogicalTablesInvalidArguments { .. }
+             | MismatchPrefix { .. }
+             | TlsConfig { .. }
+             | InvalidSetDatabaseOption { .. }
+diff --git a/src/common/meta/src/key.rs b/src/common/meta/src/key.rs
+index 644ba47223..4bf6bb065c 100644
+--- a/src/common/meta/src/key.rs
++++ b/src/common/meta/src/key.rs
+@@ -1272,6 +1272,60 @@ impl TableMetadataManager {
+             .map(|_| ())
+     }
+ 
++    /// Deletes metadata for logical tables of the same physical table **logically**.
++    /// The caller MUST ensure it has the exclusive access to all the `TableNameKey`s.
++    pub async fn delete_logical_tables_metadata(
++        &self,
++        physical_table_id: TableId,
++        tables: &[(TableId, TableName)],
++    ) -> Result<()> {
++        let keys = self.logical_tables_metadata_keys(physical_table_id, tables)?;
++        self.tombstone_manager.create(keys).await.map(|_| ())
++    }
++
++    /// Deletes the metadata tombstones of logical tables of the same physical table **permanently**.
++    /// The caller MUST ensure it has the exclusive access to all the `TableNameKey`s.
++    pub async fn delete_logical_tables_metadata_tombstone(
++        &self,
++        physical_table_id: TableId,
++        tables: &[(TableId, TableName)],
++    ) -> Result<()> {
++        let keys = self.logical_tables_metadata_keys(physical_table_id, tables)?;
++        let markers = tables
++            .iter()
++            .flat_map(|(table_id, _)| {
++                [
++                    dropped_at_key(*table_id),
++                    retention_expires_at_key(*table_id),
++                    drop_generation_key(*table_id),
++                    purging_key(*table_id),
++                ]
++            })
++            .collect();
++        self.tombstone_manager
++            .delete_with_markers(keys, markers)
++            .await
++            .map(|_| ())
++    }
++
++    fn logical_tables_metadata_keys(
++        &self,
++        physical_table_id: TableId,
++        tables: &[(TableId, TableName)],
++    ) -> Result<Vec<Vec<u8>>> {
++        let table_route_value = TableRouteValue::logical(physical_table_id);
++        let mut keys = Vec::with_capacity(tables.len() * 4);
++        for (table_id, table_name) in tables {
++            keys.extend(self.table_metadata_keys(
++                *table_id,
++                table_name,
++                &table_route_value,
++                &HashMap::new(),
++            )?);
++        }
++        Ok(keys)
++    }
++
+     /// Restores metadata for table.
+     /// The caller MUST ensure it has the exclusive access to `TableNameKey`.
+     pub async fn restore_table_metadata(
+diff --git a/src/common/meta/src/metrics.rs b/src/common/meta/src/metrics.rs
+index a977c3ed1c..969f1cc285 100644
+--- a/src/common/meta/src/metrics.rs
++++ b/src/common/meta/src/metrics.rs
+@@ -82,6 +82,12 @@ lazy_static! {
+         &["step"]
+     )
+     .unwrap();
++    pub static ref METRIC_META_PROCEDURE_DROP_TABLES: HistogramVec = register_histogram_vec!(
++        "greptime_meta_procedure_drop_tables",
++        "meta procedure drop tables",
++        &["step"]
++    )
++    .unwrap();
+     pub static ref METRIC_META_PROCEDURE_ALTER_TABLE: HistogramVec = register_histogram_vec!(
+         "greptime_meta_procedure_alter_table",
+         "meta procedure alter table",

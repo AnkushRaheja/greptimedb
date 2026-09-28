@@ -1,0 +1,952 @@
+diff --git a/src/common/meta/src/ddl/tests.rs b/src/common/meta/src/ddl/tests.rs
+index b28d4a5e23..52fd3f11f4 100644
+--- a/src/common/meta/src/ddl/tests.rs
++++ b/src/common/meta/src/ddl/tests.rs
+@@ -14,6 +14,7 @@
+ 
+ mod alter_logical_tables;
+ mod alter_table;
++mod batch_drop_logical_tables;
+ mod create_flow;
+ mod create_logical_tables;
+ mod create_table;
+diff --git a/src/common/meta/src/ddl/tests/batch_drop_logical_tables.rs b/src/common/meta/src/ddl/tests/batch_drop_logical_tables.rs
+new file mode 100644
+index 0000000000..045a6d554c
+--- /dev/null
++++ b/src/common/meta/src/ddl/tests/batch_drop_logical_tables.rs
+@@ -0,0 +1,815 @@
++// Copyright 2023 Greptime Team
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++
++use std::collections::{BTreeSet, HashSet};
++use std::sync::atomic::{AtomicBool, Ordering};
++use std::sync::{Arc, Mutex};
++use std::time::Duration;
++
++use api::region::RegionResponse;
++use api::v1::region::{RegionRequest, region_request};
++use common_catalog::consts::{DEFAULT_CATALOG_NAME, DEFAULT_SCHEMA_NAME};
++use common_error::ext::{BoxedError, ErrorExt};
++use common_error::status_code::StatusCode;
++use common_procedure::local::{LocalManager, ManagerConfig};
++use common_procedure::test_util::InMemoryPoisonStore;
++use common_procedure::{BoxedProcedure, ProcedureId, ProcedureManagerRef, ProcedureState};
++use common_query::request::QueryRequest;
++use common_recordbatch::SendableRecordBatchStream;
++use store_api::storage::RegionId;
++use table::metadata::TableId;
++use table::table_name::TableName;
++use tokio::sync::mpsc;
++
++use crate::cache_invalidator::{CacheInvalidator, Context};
++use crate::ddl::test_util::create_table::test_create_table_task;
++use crate::ddl::test_util::{
++    create_logical_table, create_physical_table_metadata, test_create_physical_table_task,
++};
++use crate::ddl::{DdlContext, TableMetadata};
++use crate::ddl_manager::{DdlManager, RepartitionProcedureFactory, RepartitionSource};
++use crate::error::Result;
++use crate::instruction::CacheIdent;
++use crate::key::MetadataKey;
++use crate::key::table_info::TableInfoKey;
++use crate::key::table_name::TableNameKey;
++use crate::key::table_route::{TableRouteKey, TableRouteValue};
++use crate::kv_backend::KvBackendRef;
++use crate::kv_backend::memory::MemoryKvBackend;
++use crate::peer::Peer;
++use crate::procedure_executor::ExecutorContext;
++use crate::rpc::ddl::{
++    CreateTableTask, DdlTask, DropTableTask, QueryContext, SubmitDdlTaskRequest,
++    SubmitDdlTaskResponse,
++};
++use crate::rpc::router::{Region, RegionRoute};
++use crate::state_store::KvStateStore;
++use crate::test_util::{MockDatanodeHandler, MockDatanodeManager, new_ddl_context_with_kv_backend};
++
++/// The number of regions of every physical table created in these tests.
++/// Region `n` is led by datanode `n`.
++const NUM_REGIONS: u32 = 3;
++
++const STALL_TIMEOUT: Duration = Duration::from_secs(60);
++
++/// A region request received by a datanode: `(datanode id, region id, is drop)`.
++/// Region close requests are recorded with `is drop == false`.
++type ReceivedRegionRequest = (u64, RegionId, bool);
++
++/// Records drop and close region requests.
++///
++/// When holding, destructive region requests never complete, which models
++/// a datanode that has not answered yet when metasrv goes down.
++#[derive(Clone, Default)]
++struct RegionRequestRecorder {
++    received: Arc<Mutex<Vec<ReceivedRegionRequest>>>,
++    holding: Arc<AtomicBool>,
++    held_tx: Option<mpsc::Sender<()>>,
++}
++
++impl RegionRequestRecorder {
++    fn holding(held_tx: mpsc::Sender<()>) -> Self {
++        Self {
++            received: Default::default(),
++            holding: Arc::new(AtomicBool::new(true)),
++            held_tx: Some(held_tx),
++        }
++    }
++
++    fn release(&self) {
++        self.holding.store(false, Ordering::SeqCst);
++    }
++
++    fn take(&self) -> Vec<ReceivedRegionRequest> {
++        std::mem::take(&mut *self.received.lock().unwrap())
++    }
++
++    fn received(&self) -> Vec<ReceivedRegionRequest> {
++        self.received.lock().unwrap().clone()
++    }
++}
++
++fn destructive_region_requests(request: &RegionRequest) -> Vec<(RegionId, bool)> {
++    match &request.body {
++        Some(region_request::Body::Drop(drop)) => vec![(RegionId::from_u64(drop.region_id), true)],
++        Some(region_request::Body::Drops(drops)) => drops
++            .requests
++            .iter()
++            .map(|drop| (RegionId::from_u64(drop.region_id), true))
++            .collect(),
++        Some(region_request::Body::Close(close)) => {
++            vec![(RegionId::from_u64(close.region_id), false)]
++        }
++        _ => vec![],
++    }
++}
++
++#[async_trait::async_trait]
++impl MockDatanodeHandler for RegionRequestRecorder {
++    async fn handle(&self, peer: &Peer, request: RegionRequest) -> Result<RegionResponse> {
++        let requests = destructive_region_requests(&request);
++        if !requests.is_empty() && self.holding.load(Ordering::SeqCst) {
++            if let Some(held_tx) = &self.held_tx {
++                let _ = held_tx.try_send(());
++            }
++            std::future::pending::<()>().await;
++        }
++        self.received.lock().unwrap().extend(
++            requests
++                .into_iter()
++                .map(|(region_id, is_drop)| (peer.id, region_id, is_drop)),
++        );
++        Ok(RegionResponse::new(0))
++    }
++
++    async fn handle_query(
++        &self,
++        _peer: &Peer,
++        _request: QueryRequest,
++    ) -> Result<SendableRecordBatchStream> {
++        unreachable!()
++    }
++}
++
++#[derive(Default)]
++struct CacheInvalidationRecorder {
++    invalidated: Mutex<Vec<CacheIdent>>,
++}
++
++#[async_trait::async_trait]
++impl CacheInvalidator for CacheInvalidationRecorder {
++    async fn invalidate(&self, _ctx: &Context, caches: &[CacheIdent]) -> Result<()> {
++        self.invalidated.lock().unwrap().extend_from_slice(caches);
++        Ok(())
++    }
++
++    fn invalidate_all(&self) -> Result<()> {
++        // The recorder owns no cache state.
++        Ok(())
++    }
++}
++
++struct NoopRepartitionProcedureFactory;
++
++#[async_trait::async_trait]
++impl RepartitionProcedureFactory for NoopRepartitionProcedureFactory {
++    fn create(
++        &self,
++        _ddl_ctx: &DdlContext,
++        _table_name: TableName,
++        _table_id: TableId,
++        _source: RepartitionSource,
++        _to_exprs: Vec<String>,
++        _timeout: Option<Duration>,
++    ) -> std::result::Result<BoxedProcedure, BoxedError> {
++        unimplemented!()
++    }
++
++    fn register_loaders(
++        &self,
++        _ddl_ctx: &DdlContext,
++        _procedure_manager: &ProcedureManagerRef,
++    ) -> std::result::Result<(), BoxedError> {
++        Ok(())
++    }
++
++    async fn ensure_gc_requirement(&self) -> std::result::Result<(), BoxedError> {
++        Ok(())
++    }
++}
++
++struct TestEnv {
++    ddl_context: DdlContext,
++    kv_backend: KvBackendRef,
++    state_kv_backend: KvBackendRef,
++    datanode: RegionRequestRecorder,
++    cache_invalidator: Arc<CacheInvalidationRecorder>,
++}
++
++impl TestEnv {
++    fn new(datanode: RegionRequestRecorder) -> Self {
++        let node_manager = Arc::new(MockDatanodeManager::new(datanode.clone()));
++        let kv_backend: KvBackendRef = Arc::new(MemoryKvBackend::new());
++        let mut ddl_context = new_ddl_context_with_kv_backend(node_manager, kv_backend.clone());
++        let cache_invalidator = Arc::new(CacheInvalidationRecorder::default());
++        ddl_context.cache_invalidator = cache_invalidator.clone();
++
++        Self {
++            ddl_context,
++            kv_backend,
++            state_kv_backend: Arc::new(MemoryKvBackend::new()),
++            datanode,
++            cache_invalidator,
++        }
++    }
++
++    /// Starts a procedure manager on the persisted procedure state of this env.
++    async fn start_ddl_manager(&self) -> (DdlManager, ProcedureManagerRef) {
++        let state_store = Arc::new(KvStateStore::new(self.state_kv_backend.clone()));
++        let procedure_manager: ProcedureManagerRef = Arc::new(LocalManager::new(
++            ManagerConfig::default(),
++            state_store,
++            Arc::new(InMemoryPoisonStore::default()),
++            None,
++            None,
++        ));
++        let ddl_manager = DdlManager::new(
++            self.ddl_context.clone(),
++            procedure_manager.clone(),
++            Arc::new(NoopRepartitionProcedureFactory),
++        );
++        ddl_manager.register_loaders().unwrap();
++        procedure_manager.start().await.unwrap();
++        (ddl_manager, procedure_manager)
++    }
++
++    /// Creates a table with [NUM_REGIONS] regions, region `n` is led by datanode `n`.
++    async fn create_table_with_regions(&self, mut task: CreateTableTask) -> TableId {
++        let TableMetadata { table_id, .. } = self
++            .ddl_context
++            .table_metadata_allocator
++            .create(&task)
++            .await
++            .unwrap();
++        task.set_table_id(table_id);
++        let region_routes = (1..=NUM_REGIONS)
++            .map(|region_number| RegionRoute {
++                region: Region::new_test(RegionId::new(table_id, region_number)),
++                leader_peer: Some(Peer::empty(region_number as u64)),
++                follower_peers: vec![],
++                leader_state: None,
++                leader_down_since: None,
++                write_route_policy: None,
++            })
++            .collect();
++        create_physical_table_metadata(
++            &self.ddl_context,
++            task.table_info,
++            TableRouteValue::physical(region_routes),
++        )
++        .await;
++        table_id
++    }
++
++    async fn create_physical_table(&self, name: &str) -> TableId {
++        self.create_table_with_regions(test_create_physical_table_task(name))
++            .await
++    }
++
++    async fn create_logical_table(&self, physical_table_id: TableId, name: &str) -> TableId {
++        create_logical_table(self.ddl_context.clone(), physical_table_id, name).await
++    }
++
++    async fn table_name_exists(&self, name: &str) -> bool {
++        self.ddl_context
++            .table_metadata_manager
++            .table_name_manager()
++            .exists(TableNameKey::new(
++                DEFAULT_CATALOG_NAME,
++                DEFAULT_SCHEMA_NAME,
++                name,
++            ))
++            .await
++            .unwrap()
++    }
++
++    async fn assert_dropped(&self, table_id: TableId, name: &str) {
++        assert!(
++            !self.table_name_exists(name).await,
++            "table {name} should be dropped"
++        );
++        let manager = &self.ddl_context.table_metadata_manager;
++        assert!(
++            manager
++                .table_info_manager()
++                .get(table_id)
++                .await
++                .unwrap()
++                .is_none(),
++            "table info of {name} should be removed"
++        );
++        assert!(
++            manager
++                .table_route_manager()
++                .table_route_storage()
++                .get(table_id)
++                .await
++                .unwrap()
++                .is_none(),
++            "table route of {name} should be removed"
++        );
++    }
++
++    /// Returns the raw name, info and route values of the tables.
++    async fn metadata_snapshot(&self, tables: &[(TableId, &str)]) -> Vec<Option<Vec<u8>>> {
++        let mut snapshot = Vec::with_capacity(tables.len() * 3);
++        for (table_id, name) in tables {
++            for key in [
++                TableNameKey::new(DEFAULT_CATALOG_NAME, DEFAULT_SCHEMA_NAME, name).to_bytes(),
++                TableInfoKey::new(*table_id).to_bytes(),
++                TableRouteKey::new(*table_id).to_bytes(),
++            ] {
++                let value = self.kv_backend.get(&key).await.unwrap().map(|kv| kv.value);
++                snapshot.push(value);
++            }
++        }
++        snapshot
++    }
++
++    fn invalidated_caches(&self) -> Vec<CacheIdent> {
++        self.cache_invalidator.invalidated.lock().unwrap().clone()
++    }
++
++    fn assert_caches_invalidated(&self, tables: &[(TableId, &str)]) {
++        let invalidated = self.invalidated_caches();
++        for (table_id, name) in tables {
++            assert!(
++                invalidated.contains(&CacheIdent::TableId(*table_id)),
++                "cache of table id {table_id} is not invalidated, invalidated: {invalidated:?}"
++            );
++            let table_name = TableName::new(DEFAULT_CATALOG_NAME, DEFAULT_SCHEMA_NAME, *name);
++            assert!(
++                invalidated.contains(&CacheIdent::TableName(table_name)),
++                "cache of table name {name} is not invalidated, invalidated: {invalidated:?}"
++            );
++        }
++    }
++}
++
++fn drop_task(name: &str, table_id: TableId, drop_if_exists: bool) -> DropTableTask {
++    DropTableTask {
++        catalog: DEFAULT_CATALOG_NAME.to_string(),
++        schema: DEFAULT_SCHEMA_NAME.to_string(),
++        table: name.to_string(),
++        table_id,
++        drop_if_exists,
++    }
++}
++
++async fn submit(ddl_manager: &DdlManager, task: DdlTask) -> Result<SubmitDdlTaskResponse> {
++    ddl_manager
++        .submit_ddl_task(
++            ExecutorContext {
++                query_context: Some(QueryContext::default()),
++                ..Default::default()
++            },
++            SubmitDdlTaskRequest::new(task),
++        )
++        .await
++}
++
++/// The logical regions of the table, each paired with the datanode leading it.
++fn logical_regions(table_id: TableId) -> BTreeSet<(u64, RegionId)> {
++    (1..=NUM_REGIONS)
++        .map(|region_number| (region_number as u64, RegionId::new(table_id, region_number)))
++        .collect()
++}
++
++fn dropped_regions(received: &[ReceivedRegionRequest]) -> BTreeSet<(u64, RegionId)> {
++    received
++        .iter()
++        .filter(|(_, _, is_drop)| *is_drop)
++        .map(|(peer_id, region_id, _)| (*peer_id, *region_id))
++        .collect()
++}
++
++/// Asserts every region of the targets is dropped on its leader, and no request
++/// touches a region of any other table, including the physical table.
++fn assert_only_regions_of(received: &[ReceivedRegionRequest], targets: &[TableId]) {
++    let dropped = dropped_regions(received);
++    for table_id in targets {
++        let expected = logical_regions(*table_id);
++        assert!(
++            expected.is_subset(&dropped),
++            "regions of table {table_id} are not dropped, expected: {expected:?}, dropped: {dropped:?}"
++        );
++    }
++    let targets = targets.iter().copied().collect::<HashSet<_>>();
++    for (peer_id, region_id, is_drop) in received {
++        assert!(
++            targets.contains(&region_id.table_id()),
++            "unexpected region request (drop: {is_drop}) to datanode {peer_id} for region {region_id}"
++        );
++    }
++}
++
++/// Waits until the procedure is finished, returns its final state.
++async fn wait_finished(procedure_manager: &ProcedureManagerRef, id: ProcedureId) -> ProcedureState {
++    let finished =
++        |state: &ProcedureState| state.is_done() || state.is_failed() || state.is_poisoned();
++    let Some(mut watcher) = procedure_manager.procedure_watcher(id) else {
++        return procedure_manager
++            .procedure_state(id)
++            .await
++            .unwrap()
++            .unwrap();
++    };
++    loop {
++        let state = watcher.borrow_and_update().clone();
++        if finished(&state) {
++            return state;
++        }
++        if watcher.changed().await.is_err() {
++            return procedure_manager
++                .procedure_state(id)
++                .await
++                .unwrap()
++                .unwrap();
++        }
++    }
++}
++
++#[tokio::test]
++async fn test_batch_drop_logical_tables() {
++    let env = TestEnv::new(RegionRequestRecorder::default());
++    let physical_table_id = env.create_physical_table("phy").await;
++    let a = env.create_logical_table(physical_table_id, "a").await;
++    let b = env.create_logical_table(physical_table_id, "b").await;
++    let c = env.create_logical_table(physical_table_id, "c").await;
++    let (ddl_manager, _procedure_manager) = env.start_ddl_manager().await;
++    let survivors = env
++        .metadata_snapshot(&[(physical_table_id, "phy"), (c, "c")])
++        .await;
++
++    submit(
++        &ddl_manager,
++        DdlTask::DropLogicalTables(vec![drop_task("a", a, false), drop_task("b", b, false)]),
++    )
++    .await
++    .unwrap();
++
++    env.assert_dropped(a, "a").await;
++    env.assert_dropped(b, "b").await;
++    assert_eq!(
++        env.metadata_snapshot(&[(physical_table_id, "phy"), (c, "c")])
++            .await,
++        survivors
++    );
++    assert_only_regions_of(&env.datanode.take(), &[a, b]);
++
++    // Dropping another logical table of the same physical table keeps working.
++    submit(&ddl_manager, DdlTask::DropTable(drop_task("c", c, false)))
++        .await
++        .unwrap();
++    env.assert_dropped(c, "c").await;
++    assert_only_regions_of(&env.datanode.take(), &[c]);
++    assert!(env.table_name_exists("phy").await);
++}
++
++#[tokio::test]
++async fn test_batch_drop_logical_tables_invalidates_caches() {
++    let env = TestEnv::new(RegionRequestRecorder::default());
++    let physical_table_id = env.create_physical_table("phy").await;
++    let a = env.create_logical_table(physical_table_id, "a").await;
++    let b = env.create_logical_table(physical_table_id, "b").await;
++    let _c = env.create_logical_table(physical_table_id, "c").await;
++    let (ddl_manager, _procedure_manager) = env.start_ddl_manager().await;
++
++    submit(
++        &ddl_manager,
++        DdlTask::DropLogicalTables(vec![drop_task("a", a, false), drop_task("b", b, false)]),
++    )
++    .await
++    .unwrap();
++
++    env.assert_caches_invalidated(&[(a, "a"), (b, "b")]);
++}
++
++#[tokio::test]
++async fn test_batch_drop_logical_tables_skips_absent_table_if_exists() {
++    let env = TestEnv::new(RegionRequestRecorder::default());
++    let physical_table_id = env.create_physical_table("phy").await;
++    let a = env.create_logical_table(physical_table_id, "a").await;
++    let b = env.create_logical_table(physical_table_id, "b").await;
++    let c = env.create_logical_table(physical_table_id, "c").await;
++    let (ddl_manager, _procedure_manager) = env.start_ddl_manager().await;
++    let survivors = env
++        .metadata_snapshot(&[(physical_table_id, "phy"), (c, "c")])
++        .await;
++
++    submit(
++        &ddl_manager,
++        DdlTask::DropLogicalTables(vec![
++            drop_task("a", a, false),
++            drop_task("absent", 9999, true),
++            drop_task("b", b, false),
++        ]),
++    )
++    .await
++    .unwrap();
++
++    env.assert_dropped(a, "a").await;
++    env.assert_dropped(b, "b").await;
++    assert_eq!(
++        env.metadata_snapshot(&[(physical_table_id, "phy"), (c, "c")])
++            .await,
++        survivors
++    );
++    assert_only_regions_of(&env.datanode.take(), &[a, b]);
++    env.assert_caches_invalidated(&[(a, "a"), (b, "b")]);
++
++    // A batch in which every target is absent is a no-op.
++    submit(
++        &ddl_manager,
++        DdlTask::DropLogicalTables(vec![drop_task("a", a, true), drop_task("b", b, true)]),
++    )
++    .await
++    .unwrap();
++    assert!(env.datanode.take().is_empty());
++    assert_eq!(
++        env.metadata_snapshot(&[(physical_table_id, "phy"), (c, "c")])
++            .await,
++        survivors
++    );
++}
++
++#[tokio::test]
++async fn test_batch_drop_logical_tables_rejects_absent_table() {
++    let env = TestEnv::new(RegionRequestRecorder::default());
++    let physical_table_id = env.create_physical_table("phy").await;
++    let a = env.create_logical_table(physical_table_id, "a").await;
++    let b = env.create_logical_table(physical_table_id, "b").await;
++    let c = env.create_logical_table(physical_table_id, "c").await;
++    let (ddl_manager, _procedure_manager) = env.start_ddl_manager().await;
++    let tables = [(physical_table_id, "phy"), (a, "a"), (b, "b"), (c, "c")];
++    let before = env.metadata_snapshot(&tables).await;
++
++    // Dropping the absent table alone reports it as not found.
++    let err = submit(
++        &ddl_manager,
++        DdlTask::DropTable(drop_task("absent", 9999, false)),
++    )
++    .await
++    .unwrap_err();
++    assert_eq!(err.status_code(), StatusCode::TableNotFound);
++
++    for tasks in [
++        vec![
++            drop_task("a", a, false),
++            drop_task("absent", 9999, false),
++            drop_task("b", b, false),
++        ],
++        vec![
++            drop_task("absent", 9999, false),
++            drop_task("a", a, false),
++            drop_task("b", b, false),
++        ],
++    ] {
++        let err = submit(&ddl_manager, DdlTask::DropLogicalTables(tasks))
++            .await
++            .unwrap_err();
++        assert_eq!(err.status_code(), StatusCode::TableNotFound, "{err:?}");
++        assert_eq!(env.metadata_snapshot(&tables).await, before);
++        assert!(dropped_regions(&env.datanode.take()).is_empty());
++    }
++
++    // The rejected batches leave the tables droppable.
++    submit(
++        &ddl_manager,
++        DdlTask::DropLogicalTables(vec![drop_task("a", a, false), drop_task("b", b, false)]),
++    )
++    .await
++    .unwrap();
++    env.assert_dropped(a, "a").await;
++    env.assert_dropped(b, "b").await;
++    assert_only_regions_of(&env.datanode.take(), &[a, b]);
++}
++
++#[tokio::test]
++async fn test_batch_drop_logical_tables_rejects_different_physical_tables() {
++    let env = TestEnv::new(RegionRequestRecorder::default());
++    let physical_table_id = env.create_physical_table("phy").await;
++    let other_physical_table_id = env.create_physical_table("other_phy").await;
++    let a = env.create_logical_table(physical_table_id, "a").await;
++    let b = env.create_logical_table(physical_table_id, "b").await;
++    let x = env.create_logical_table(other_physical_table_id, "x").await;
++    let (ddl_manager, _procedure_manager) = env.start_ddl_manager().await;
++    let tables = [
++        (physical_table_id, "phy"),
++        (other_physical_table_id, "other_phy"),
++        (a, "a"),
++        (b, "b"),
++        (x, "x"),
++    ];
++    let before = env.metadata_snapshot(&tables).await;
++
++    for tasks in [
++        vec![drop_task("a", a, false), drop_task("x", x, false)],
++        vec![
++            drop_task("x", x, false),
++            drop_task("a", a, false),
++            drop_task("b", b, false),
++        ],
++    ] {
++        submit(&ddl_manager, DdlTask::DropLogicalTables(tasks))
++            .await
++            .unwrap_err();
++        assert_eq!(env.metadata_snapshot(&tables).await, before);
++        assert!(dropped_regions(&env.datanode.take()).is_empty());
++    }
++
++    // The rejected batches leave the tables droppable.
++    submit(
++        &ddl_manager,
++        DdlTask::DropLogicalTables(vec![drop_task("a", a, false), drop_task("b", b, false)]),
++    )
++    .await
++    .unwrap();
++    env.assert_dropped(a, "a").await;
++    env.assert_dropped(b, "b").await;
++    assert!(env.table_name_exists("x").await);
++    assert_only_regions_of(&env.datanode.take(), &[a, b]);
++}
++
++#[tokio::test]
++async fn test_batch_drop_logical_tables_rejects_non_logical_tables() {
++    let env = TestEnv::new(RegionRequestRecorder::default());
++    let physical_table_id = env.create_physical_table("phy").await;
++    let ordinary_table_id = env
++        .create_table_with_regions(test_create_table_task("ordinary", 0))
++        .await;
++    let a = env.create_logical_table(physical_table_id, "a").await;
++    let b = env.create_logical_table(physical_table_id, "b").await;
++    let (ddl_manager, _procedure_manager) = env.start_ddl_manager().await;
++    let tables = [
++        (physical_table_id, "phy"),
++        (ordinary_table_id, "ordinary"),
++        (a, "a"),
++        (b, "b"),
++    ];
++    let before = env.metadata_snapshot(&tables).await;
++
++    for tasks in [
++        vec![
++            drop_task("a", a, false),
++            drop_task("phy", physical_table_id, false),
++        ],
++        vec![
++            drop_task("phy", physical_table_id, false),
++            drop_task("a", a, false),
++        ],
++        vec![
++            drop_task("a", a, false),
++            drop_task("ordinary", ordinary_table_id, false),
++        ],
++        vec![
++            drop_task("ordinary", ordinary_table_id, false),
++            drop_task("b", b, false),
++        ],
++    ] {
++        submit(&ddl_manager, DdlTask::DropLogicalTables(tasks))
++            .await
++            .unwrap_err();
++        assert_eq!(env.metadata_snapshot(&tables).await, before);
++        assert!(dropped_regions(&env.datanode.take()).is_empty());
++    }
++
++    // The rejected batches leave the tables droppable.
++    submit(
++        &ddl_manager,
++        DdlTask::DropLogicalTables(vec![drop_task("a", a, false), drop_task("b", b, false)]),
++    )
++    .await
++    .unwrap();
++    env.assert_dropped(a, "a").await;
++    env.assert_dropped(b, "b").await;
++    assert!(env.table_name_exists("phy").await);
++    assert!(env.table_name_exists("ordinary").await);
++    assert_only_regions_of(&env.datanode.take(), &[a, b]);
++}
++
++#[tokio::test]
++async fn test_batch_drop_logical_tables_with_duplicate_targets() {
++    let env = TestEnv::new(RegionRequestRecorder::default());
++    let physical_table_id = env.create_physical_table("phy").await;
++    let a = env.create_logical_table(physical_table_id, "a").await;
++    let b = env.create_logical_table(physical_table_id, "b").await;
++    let c = env.create_logical_table(physical_table_id, "c").await;
++    let (ddl_manager, _procedure_manager) = env.start_ddl_manager().await;
++    let survivors = env
++        .metadata_snapshot(&[(physical_table_id, "phy"), (c, "c")])
++        .await;
++
++    submit(
++        &ddl_manager,
++        DdlTask::DropLogicalTables(vec![
++            drop_task("a", a, false),
++            drop_task("b", b, false),
++            drop_task("a", a, false),
++        ]),
++    )
++    .await
++    .unwrap();
++
++    env.assert_dropped(a, "a").await;
++    env.assert_dropped(b, "b").await;
++    assert_eq!(
++        env.metadata_snapshot(&[(physical_table_id, "phy"), (c, "c")])
++            .await,
++        survivors
++    );
++    assert_only_regions_of(&env.datanode.take(), &[a, b]);
++    env.assert_caches_invalidated(&[(a, "a"), (b, "b")]);
++
++    submit(&ddl_manager, DdlTask::DropTable(drop_task("c", c, false)))
++        .await
++        .unwrap();
++    env.assert_dropped(c, "c").await;
++    assert!(env.table_name_exists("phy").await);
++}
++
++#[tokio::test(flavor = "multi_thread")]
++async fn test_batch_drop_logical_tables_recovers_after_restart() {
++    let (held_tx, mut held_rx) = mpsc::channel(16);
++    let env = TestEnv::new(RegionRequestRecorder::holding(held_tx));
++    let physical_table_id = env.create_physical_table("phy").await;
++    let a = env.create_logical_table(physical_table_id, "a").await;
++    let b = env.create_logical_table(physical_table_id, "b").await;
++    let c = env.create_logical_table(physical_table_id, "c").await;
++    let survivors = env
++        .metadata_snapshot(&[(physical_table_id, "phy"), (c, "c")])
++        .await;
++
++    let (ddl_manager, procedure_manager) = env.start_ddl_manager().await;
++    let ddl_manager = Arc::new(ddl_manager);
++    let mut submission = tokio::spawn({
++        let ddl_manager = ddl_manager.clone();
++        async move {
++            submit(
++                &ddl_manager,
++                DdlTask::DropLogicalTables(vec![
++                    drop_task("a", a, false),
++                    drop_task("b", b, false),
++                ]),
++            )
++            .await
++        }
++    });
++
++    // Waits until the batch is dropping regions and no datanode has answered yet.
++    tokio::time::timeout(STALL_TIMEOUT, async {
++        tokio::select! {
++            held = held_rx.recv() => held.unwrap(),
++            result = &mut submission => {
++                panic!("the batch finished before any region is dropped: {result:?}")
++            }
++        }
++    })
++    .await
++    .expect("the batch never reached the datanodes");
++    procedure_manager.stop().await.unwrap();
++    let _ = tokio::time::timeout(STALL_TIMEOUT, submission)
++        .await
++        .expect("the submission is not finished after stopping the procedure manager");
++    drop(ddl_manager);
++
++    env.datanode.release();
++    assert!(env.datanode.received().is_empty());
++
++    // Restarts on the persisted procedure state.
++    let (ddl_manager, procedure_manager) = env.start_ddl_manager().await;
++    let procedures = procedure_manager.list_procedures().await.unwrap();
++    assert!(!procedures.is_empty(), "no procedure is recovered");
++    for procedure in procedures {
++        let state = tokio::time::timeout(
++            STALL_TIMEOUT,
++            wait_finished(&procedure_manager, procedure.id),
++        )
++        .await
++        .expect("the recovered procedure is stalled");
++        assert!(
++            state.is_done(),
++            "recovered procedure {} ({}) is not done: {state:?}",
++            procedure.id,
++            procedure.type_name
++        );
++    }
++
++    env.assert_dropped(a, "a").await;
++    env.assert_dropped(b, "b").await;
++    assert_eq!(
++        env.metadata_snapshot(&[(physical_table_id, "phy"), (c, "c")])
++            .await,
++        survivors
++    );
++    assert_only_regions_of(&env.datanode.take(), &[a, b]);
++    env.assert_caches_invalidated(&[(a, "a"), (b, "b")]);
++
++    // Dropping another logical table of the same physical table keeps working.
++    submit(&ddl_manager, DdlTask::DropTable(drop_task("c", c, false)))
++        .await
++        .unwrap();
++    env.assert_dropped(c, "c").await;
++    assert!(env.table_name_exists("phy").await);
++}
+diff --git a/test.sh b/test.sh
+new file mode 100755
+index 0000000000..1a7c92ee11
+--- /dev/null
++++ b/test.sh
+@@ -0,0 +1,113 @@
++#!/usr/bin/env bash
++# Runs the common-meta unit tests covering logical table DDL.
++#
++# Usage: ./test.sh <base|new> [junit-output-path]
++#
++#   base  existing common-meta unit tests (regression suite)
++#   new   batch drop of logical tables tests
++#
++# The JUnit report is written to the second argument, or to $JUNIT_OUTPUT, or
++# to test-results/<mode>.xml. Requires cargo-nextest; installs nothing.
++
++set -uo pipefail
++
++MODE="${1:-}"
++case "$MODE" in
++    base)
++        FILTER='package(common-meta) & kind(lib) & !test(/^ddl::tests::batch_drop_logical_tables::/)'
++        ;;
++    new)
++        FILTER='package(common-meta) & kind(lib) & test(/^ddl::tests::batch_drop_logical_tables::/)'
++        ;;
++    *)
++        echo "usage: $0 <base|new> [junit-output-path]" >&2
++        exit 2
++        ;;
++esac
++
++ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++cd "$ROOT" || exit 2
++
++JUNIT_OUTPUT="${2:-${JUNIT_OUTPUT:-$ROOT/test-results/$MODE.xml}}"
++mkdir -p "$(dirname "$JUNIT_OUTPUT")"
++PROFILE="junit-report"
++WORK_DIR="$(mktemp -d)"
++trap 'rm -rf "$WORK_DIR"' EXIT
++
++cat > "$WORK_DIR/nextest.toml" <<EOF
++[store]
++dir = "$WORK_DIR/store"
++
++[profile.$PROFILE]
++retries = 0
++fail-fast = false
++slow-timeout = { period = "60s", terminate-after = 5 }
++
++[profile.$PROFILE.junit]
++path = "junit.xml"
++store-success-output = false
++store-failure-output = true
++EOF
++
++xml_escape() {
++    sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g' -e 's/"/\&quot;/g'
++}
++
++# Writes a failing report when no test could run, e.g. the build failed.
++write_fallback_junit() {
++    local reason="$1" log="$2"
++    {
++        echo '<?xml version="1.0" encoding="UTF-8"?>'
++        echo "<testsuites name=\"$MODE\" tests=\"1\" failures=\"1\" errors=\"0\">"
++        echo "  <testsuite name=\"common-meta\" tests=\"1\" failures=\"1\" errors=\"0\">"
++        echo "    <testcase classname=\"common-meta\" name=\"$MODE::$reason\">"
++        echo "      <failure message=\"$reason\" type=\"$reason\">"
++        tail -n 200 "$log" | xml_escape
++        echo "      </failure>"
++        echo "    </testcase>"
++        echo "  </testsuite>"
++        echo "</testsuites>"
++    } > "$JUNIT_OUTPUT"
++}
++
++NEXTEST_ARGS=(
++    -p common-meta
++    --lib
++    --config-file "$WORK_DIR/nextest.toml"
++    --profile "$PROFILE"
++    -E "$FILTER"
++)
++
++# Builds the tests and checks that the selected tests exist.
++if ! cargo nextest list "${NEXTEST_ARGS[@]}" > "$WORK_DIR/list.log" 2>&1; then
++    cat "$WORK_DIR/list.log" >&2
++    write_fallback_junit "build" "$WORK_DIR/list.log"
++    echo "test.sh: failed to build or list the tests" >&2
++    exit 1
++fi
++NUM_TESTS="$(grep -c '^common-meta ' "$WORK_DIR/list.log")"
++echo "test.sh: mode=$MODE selected $NUM_TESTS tests"
++if [ "$NUM_TESTS" -eq 0 ]; then
++    cat "$WORK_DIR/list.log" >&2
++    write_fallback_junit "discovery" "$WORK_DIR/list.log"
++    echo "test.sh: no test is selected" >&2
++    exit 1
++fi
++
++REPORT="$WORK_DIR/store/$PROFILE/junit.xml"
++rm -f "$REPORT"
++cargo nextest run "${NEXTEST_ARGS[@]}" \
++    --retries 0 \
++    --no-fail-fast \
++    --test-threads "${TEST_THREADS:-4}" 2>&1 | tee "$WORK_DIR/run.log"
++STATUS="${PIPESTATUS[0]}"
++
++if [ -s "$REPORT" ]; then
++    cp "$REPORT" "$JUNIT_OUTPUT"
++else
++    write_fallback_junit "run" "$WORK_DIR/run.log"
++    [ "$STATUS" -eq 0 ] && STATUS=1
++fi
++
++echo "test.sh: mode=$MODE status=$STATUS junit=$JUNIT_OUTPUT"
++exit "$STATUS"

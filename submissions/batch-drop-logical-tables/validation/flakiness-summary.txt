@@ -1,0 +1,15 @@
+NEW run 1 exit=0 Summary [   0.056s] 8 tests run: 8 passed, 602 skipped
+NEW run 2 exit=0 Summary [   0.058s] 8 tests run: 8 passed, 602 skipped
+NEW run 3 exit=0 Summary [   0.052s] 8 tests run: 8 passed, 602 skipped
+NEW run 4 exit=0 Summary [   0.060s] 8 tests run: 8 passed, 602 skipped
+NEW run 5 exit=0 Summary [   0.056s] 8 tests run: 8 passed, 602 skipped
+NEW run 6 exit=0 Summary [   0.054s] 8 tests run: 8 passed, 602 skipped
+NEW run 7 exit=0 Summary [   0.058s] 8 tests run: 8 passed, 602 skipped
+NEW run 8 exit=0 Summary [   0.059s] 8 tests run: 8 passed, 602 skipped
+NEW run 9 exit=0 Summary [   0.054s] 8 tests run: 8 passed, 602 skipped
+NEW run 10 exit=0 Summary [   0.054s] 8 tests run: 8 passed, 602 skipped
+recovery test isolated x20: pass=20 fail=0
+NEW all tests in one process, 8 threads x20: pass=20 fail=0
+BASE run 1 exit=0 Summary [   3.792s] 602 tests run: 602 passed, 8 skipped
+BASE run 2 exit=0 Summary [   9.558s] 602 tests run: 602 passed, 8 skipped
+BASE run 3 exit=0 Summary [   4.961s] 602 tests run: 602 passed, 8 skipped

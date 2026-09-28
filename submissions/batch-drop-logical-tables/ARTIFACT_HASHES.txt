@@ -1,0 +1,26 @@
+# Artifact hashes and identities
+# generated 2026-09-28T05:26:02Z at pinned commit 2b596fd52df31dcad779794877a296de7746f736
+
+## sha256
+a9a902ad38058ad8c6b9f8c3499ac5ee2a664de402ff80359219ea5a6d28b132  Dockerfile
+2641edb657a34eb50e819e241880f818091d243ef9e3bbb23be49a36d15e0320  test.patch
+03d2aa5d81ff3ad59feb92f651cc40f56165baacc323787941e1b87b7ec11ceb  solution.patch
+
+## identity (file bytes lines crlf_lines bom trailing_newline)
+Dockerfile bytes=2126 lines=56 crlf_lines=0 bom=no trailing_newline=yes non_ascii_lines=0
+test.patch bytes=33770 lines=952 crlf_lines=0 bom=no trailing_newline=yes non_ascii_lines=0
+solution.patch bytes=25660 lines=670 crlf_lines=0 bom=no trailing_newline=yes non_ascii_lines=0
+
+## changed files: test.patch
+src/common/meta/src/ddl/tests.rs +1 -0 index b28d4a5e23..52fd3f11f4 100644
+src/common/meta/src/ddl/tests/batch_drop_logical_tables.rs +815 -0 new file mode 100644
+test.sh +113 -0 new file mode 100755
+
+## changed files: solution.patch
+src/common/meta/src/ddl.rs +1 -0 index f70ba2b386..a594e990cd 100644
+src/common/meta/src/ddl/drop_logical_tables.rs +430 -0 new file mode 100644
+src/common/meta/src/ddl_manager.rs +74 -1 index eddb414876..9fad208a40 100644
+src/common/meta/src/error.rs +8 -0 index 3f4868ffba..7727b012b9 100644
+src/common/meta/src/key.rs +54 -0 index 644ba47223..4bf6bb065c 100644
+src/common/meta/src/metrics.rs +6 -0 index a977c3ed1c..969f1cc285 100644
+
