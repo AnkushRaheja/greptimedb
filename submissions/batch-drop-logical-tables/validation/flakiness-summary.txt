@@ -1,3 +1,19 @@
+# Revision 2 (runner: ./test.sh --output_path <path> <mode>)
+NEW run 1 exit=0 Summary [   0.061s] 8 tests run: 8 passed, 602 skipped
+NEW run 2 exit=0 Summary [   0.058s] 8 tests run: 8 passed, 602 skipped
+NEW run 3 exit=0 Summary [   0.053s] 8 tests run: 8 passed, 602 skipped
+NEW run 4 exit=0 Summary [   0.050s] 8 tests run: 8 passed, 602 skipped
+NEW run 5 exit=0 Summary [   0.059s] 8 tests run: 8 passed, 602 skipped
+NEW run 6 exit=0 Summary [   0.050s] 8 tests run: 8 passed, 602 skipped
+NEW run 7 exit=0 Summary [   0.059s] 8 tests run: 8 passed, 602 skipped
+NEW run 8 exit=0 Summary [   0.056s] 8 tests run: 8 passed, 602 skipped
+NEW run 9 exit=0 Summary [   0.056s] 8 tests run: 8 passed, 602 skipped
+NEW run 10 exit=0 Summary [   0.059s] 8 tests run: 8 passed, 602 skipped
+BASE run 1 exit=0 Summary [   2.406s] 602 tests run: 602 passed, 8 skipped
+BASE run 2 exit=0 Summary [   5.135s] 602 tests run: 602 passed, 8 skipped
+BASE run 3 exit=0 Summary [   3.371s] 602 tests run: 602 passed, 8 skipped
+
+# Revision 1 (previous runner; Rust tests unchanged)
 NEW run 1 exit=0 Summary [   0.056s] 8 tests run: 8 passed, 602 skipped
 NEW run 2 exit=0 Summary [   0.058s] 8 tests run: 8 passed, 602 skipped
 NEW run 3 exit=0 Summary [   0.052s] 8 tests run: 8 passed, 602 skipped

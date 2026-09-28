@@ -13,7 +13,7 @@ for m in $(python3 $SP/mutants.py list); do
     if ! python3 $SP/mutants.py $m > $SP/mutants/$m.apply.log 2>&1; then
         echo "$m APPLY-FAILED" >> $SP/mutants/summary.txt; continue
     fi
-    timeout 900 ./test.sh new $SP/mutants/$m.xml > $SP/mutants/$m.log 2>&1
+    timeout 900 ./test.sh --output_path $SP/mutants/$m.xml new > $SP/mutants/$m.log 2>&1
     st=$?
     failed=$(grep -oE "FAIL \[[^]]*\] \([0-9]+/[0-9]+\) common-meta ddl::tests::batch_drop_logical_tables::[a-z_]+" $SP/mutants/$m.log | sed 's/.*:://' | sort -u | tr '\n' ' ')
     summ=$(grep -E "Summary" $SP/mutants/$m.log | tail -1 | sed 's/^ *//')

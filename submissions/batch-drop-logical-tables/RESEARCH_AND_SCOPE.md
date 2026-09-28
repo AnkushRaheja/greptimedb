@@ -38,7 +38,7 @@ Logical tables never roll back, and soft drop falls back to hard drop.
    - targets on different physical tables are rejected (mandatory: no splitting);
    - a rejected batch changes no metadata and drops no region.
 4. A duplicated target must not fail the batch or affect other tables. No particular deduplication strategy is required.
-5. After a procedure-manager restart mid-batch, the recovered batch finishes every target.
+5. If metasrv restarts mid-batch, the recovered batch finishes every target. The test models this by restarting the procedure manager on the same persisted procedure state and metadata.
 6. Single-table drop is unchanged.
 
 **Out of scope:** frontend/SQL routing; soft-drop/undrop/purge; dropping physical tables through the batch; splitting multi-physical batches; physical-column cleanup; atomicity against KV storage faults; a name whose current id differs from the task's `table_id`; events and metrics; concurrency with other DDL beyond normal procedure locking; transient-retry and region-not-found semantics beyond recovery.

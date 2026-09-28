@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="nextest-run" tests="8" skipped="0" failures="0" errors="0" uuid="c9f1cad3-af81-4acd-a2f5-d8f398f756a9" timestamp="2026-09-28T09:47:58.153+00:00" time="0.063">
+    <testsuite name="common-meta" tests="8" skipped="0" errors="0" failures="0">
+        <testcase name="ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_invalidates_caches" classname="common-meta" timestamp="2026-09-28T09:47:58.154+00:00" time="0.025"/>
+        <testcase name="ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables" classname="common-meta" timestamp="2026-09-28T09:47:58.154+00:00" time="0.029"/>
+        <testcase name="ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_absent_table" classname="common-meta" timestamp="2026-09-28T09:47:58.154+00:00" time="0.032"/>
+        <testcase name="ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_recovers_after_restart" classname="common-meta" timestamp="2026-09-28T09:47:58.154+00:00" time="0.037"/>
+        <testcase name="ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_different_physical_tables" classname="common-meta" timestamp="2026-09-28T09:47:58.179+00:00" time="0.024"/>
+        <testcase name="ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_non_logical_tables" classname="common-meta" timestamp="2026-09-28T09:47:58.184+00:00" time="0.021"/>
+        <testcase name="ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_skips_absent_table_if_exists" classname="common-meta" timestamp="2026-09-28T09:47:58.186+00:00" time="0.025"/>
+        <testcase name="ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_with_duplicate_targets" classname="common-meta" timestamp="2026-09-28T09:47:58.194+00:00" time="0.022"/>
+    </testsuite>
+</testsuites>

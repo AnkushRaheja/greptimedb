@@ -27,7 +27,7 @@ created with the existing logical-table create helper.
 | R10 | Targets of different physical tables reject the batch | PROMPT | `..._rejects_different_physical_tables` | `is_err()` only; two orderings |
 | R11 | A rejected batch changes no table metadata and drops no region | PROMPT | R8/R9/R10 tests | raw name/info/route values of every involved table byte-identical before/after; no drop request recorded; a later valid batch still succeeds |
 | R12 | A duplicated target must not fail the batch or affect other tables | PROMPT | `..._with_duplicate_targets` | Ok; targets dropped; survivor/physical unchanged; no request to non-target regions. Number of drop requests per logical region is **not** asserted |
-| R13 | After a procedure-manager restart mid-batch, the recovered batch finishes dropping every target | PROMPT | `..._recovers_after_restart` | first destructive region request is held until the manager is stopped; a new manager on the same persisted state (`register_loaders`, `start`) is awaited for every recovered procedure; all end `Done`; every target dropped (metadata + region drops after restart); survivor/physical unchanged; later single drop works |
+| R13 | If metasrv restarts while a batch is running, the recovered batch finishes dropping every target | PROMPT | `..._recovers_after_restart` | first destructive region request is held until the manager is stopped; a new manager on the same persisted state (`register_loaders`, `start`) is awaited for every recovered procedure; all end `Done`; every target dropped (metadata + region drops after restart); survivor/physical unchanged; later single drop works |
 | R14 | Single-table drop behavior is unchanged | PROMPT; REPO | BASE (all 602 existing common-meta unit tests, including `ddl::tests::drop_table`) | existing assertions |
 
 ## Fairness notes
@@ -40,6 +40,7 @@ created with the existing logical-table create helper.
   - Timeouts (60 s) only detect stalls; they never decide pass or fail.
   - The test awaits every procedure the manager recovers, so a design that uses sub-procedures also passes.
 - **Duplicates.** Only the externally relevant property is asserted: no failure, no effect on other tables or the physical regions, and consistent metadata.
+- **Restart model.** The prompt says metasrv restarts. The test models that by stopping the procedure manager and starting a new one over the same persisted procedure state and metadata store, which is the durable state a restarted metasrv recovers from.
 
 ## Mutation coverage
 

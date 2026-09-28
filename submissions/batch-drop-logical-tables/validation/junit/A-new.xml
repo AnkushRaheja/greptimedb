@@ -1,0 +1,1320 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="nextest-run" tests="8" skipped="0" failures="8" errors="0" uuid="8935aa8c-77d7-423c-a71f-e2e8a6135703" timestamp="2026-09-28T09:45:14.751+00:00" time="1.137">
+    <testsuite name="common-meta" tests="8" skipped="0" errors="0" failures="8">
+        <testcase name="ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_invalidates_caches" classname="common-meta" timestamp="2026-09-28T09:45:14.752+00:00" time="0.565">
+            <failure message="thread &apos;ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_invalidates_caches&apos; (2706) panicked at src/common/meta/src/ddl_manager.rs:1004:41" type="test failure with exit code 101">thread &apos;ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_invalidates_caches&apos; (2706) panicked at src/common/meta/src/ddl_manager.rs:1004:41:
+not yet implemented
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/panicking.rs:689:5
+   1: core::panicking::panic_fmt
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:80:14
+   2: core::panicking::panic
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:150:5
+   3: common_meta::ddl_manager::DdlManager::submit_ddl_task::{{closure}}::{{closure}}
+             at ./src/ddl_manager.rs:1004:41
+   4: &lt;tracing::instrument::Instrumented&lt;T&gt; as core::future::future::Future&gt;::poll
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tracing-0.1.44/src/instrument.rs:321:15
+   5: common_meta::ddl_manager::DdlManager::submit_ddl_task::{{closure}}
+             at ./src/ddl_manager.rs:1069:10
+   6: common_meta::ddl::tests::batch_drop_logical_tables::submit::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:369:10
+   7: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_invalidates_caches::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:483:6
+   8: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+   9: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+  10: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:778:70
+  11: tokio::task::coop::with_budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:167:5
+  12: tokio::task::coop::budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:133:5
+  13: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:778:25
+  14: tokio::runtime::scheduler::current_thread::Context::enter
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:451:19
+  15: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:777:44
+  16: tokio::runtime::scheduler::current_thread::CoreGuard::enter::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:865:68
+  17: tokio::runtime::context::scoped::Scoped&lt;T&gt;::set
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/scoped.rs:40:9
+  18: tokio::runtime::context::set_scheduler::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context.rs:181:38
+  19: std::thread::local::LocalKey&lt;T&gt;::try_with
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/thread/local.rs:462:12
+  20: std::thread::local::LocalKey&lt;T&gt;::with
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/thread/local.rs:426:20
+  21: tokio::runtime::context::set_scheduler
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context.rs:181:17
+  22: tokio::runtime::scheduler::current_thread::CoreGuard::enter
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:865:27
+  23: tokio::runtime::scheduler::current_thread::CoreGuard::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:765:24
+  24: tokio::runtime::scheduler::current_thread::CurrentThread::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:205:33
+  25: tokio::runtime::context::runtime::enter_runtime
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/runtime.rs:65:16
+  26: tokio::runtime::scheduler::current_thread::CurrentThread::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:193:9
+  27: tokio::runtime::runtime::Runtime::block_on_inner
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:371:52
+  28: tokio::runtime::runtime::Runtime::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:345:18
+  29: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_invalidates_caches
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:486:57
+  30: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_invalidates_caches::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:471:61
+  31: core::ops::function::FnOnce::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+  32: &lt;fn() -&gt; core::result::Result&lt;(), alloc::string::String&gt; as core::ops::function::FnOnce&lt;()&gt;&gt;::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.</failure>
+            <system-out>
+running 1 test
+test ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_invalidates_caches ... FAILED
+
+failures:
+
+failures:
+    ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_invalidates_caches
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 609 filtered out; finished in 0.52s
+
+</system-out>
+            <system-err>
+thread &apos;ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_invalidates_caches&apos; (2706) panicked at src/common/meta/src/ddl_manager.rs:1004:41:
+not yet implemented
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/panicking.rs:689:5
+   1: core::panicking::panic_fmt
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:80:14
+   2: core::panicking::panic
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:150:5
+   3: common_meta::ddl_manager::DdlManager::submit_ddl_task::{{closure}}::{{closure}}
+             at ./src/ddl_manager.rs:1004:41
+   4: &lt;tracing::instrument::Instrumented&lt;T&gt; as core::future::future::Future&gt;::poll
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tracing-0.1.44/src/instrument.rs:321:15
+   5: common_meta::ddl_manager::DdlManager::submit_ddl_task::{{closure}}
+             at ./src/ddl_manager.rs:1069:10
+   6: common_meta::ddl::tests::batch_drop_logical_tables::submit::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:369:10
+   7: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_invalidates_caches::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:483:6
+   8: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+   9: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+  10: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:778:70
+  11: tokio::task::coop::with_budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:167:5
+  12: tokio::task::coop::budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:133:5
+  13: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:778:25
+  14: tokio::runtime::scheduler::current_thread::Context::enter
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:451:19
+  15: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:777:44
+  16: tokio::runtime::scheduler::current_thread::CoreGuard::enter::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:865:68
+  17: tokio::runtime::context::scoped::Scoped&lt;T&gt;::set
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/scoped.rs:40:9
+  18: tokio::runtime::context::set_scheduler::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context.rs:181:38
+  19: std::thread::local::LocalKey&lt;T&gt;::try_with
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/thread/local.rs:462:12
+  20: std::thread::local::LocalKey&lt;T&gt;::with
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/thread/local.rs:426:20
+  21: tokio::runtime::context::set_scheduler
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context.rs:181:17
+  22: tokio::runtime::scheduler::current_thread::CoreGuard::enter
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:865:27
+  23: tokio::runtime::scheduler::current_thread::CoreGuard::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:765:24
+  24: tokio::runtime::scheduler::current_thread::CurrentThread::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:205:33
+  25: tokio::runtime::context::runtime::enter_runtime
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/runtime.rs:65:16
+  26: tokio::runtime::scheduler::current_thread::CurrentThread::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:193:9
+  27: tokio::runtime::runtime::Runtime::block_on_inner
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:371:52
+  28: tokio::runtime::runtime::Runtime::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:345:18
+  29: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_invalidates_caches
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:486:57
+  30: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_invalidates_caches::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:471:61
+  31: core::ops::function::FnOnce::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+  32: &lt;fn() -&gt; core::result::Result&lt;(), alloc::string::String&gt; as core::ops::function::FnOnce&lt;()&gt;&gt;::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+</system-err>
+        </testcase>
+        <testcase name="ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_absent_table" classname="common-meta" timestamp="2026-09-28T09:45:14.753+00:00" time="0.566">
+            <failure message="thread &apos;ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_absent_table&apos; (2708) panicked at src/common/meta/src/ddl_manager.rs:1004:41" type="test failure with exit code 101">thread &apos;ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_absent_table&apos; (2708) panicked at src/common/meta/src/ddl_manager.rs:1004:41:
+not yet implemented
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/panicking.rs:689:5
+   1: core::panicking::panic_fmt
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:80:14
+   2: core::panicking::panic
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:150:5
+   3: common_meta::ddl_manager::DdlManager::submit_ddl_task::{{closure}}::{{closure}}
+             at ./src/ddl_manager.rs:1004:41
+   4: &lt;tracing::instrument::Instrumented&lt;T&gt; as core::future::future::Future&gt;::poll
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tracing-0.1.44/src/instrument.rs:321:15
+   5: common_meta::ddl_manager::DdlManager::submit_ddl_task::{{closure}}
+             at ./src/ddl_manager.rs:1069:10
+   6: common_meta::ddl::tests::batch_drop_logical_tables::submit::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:369:10
+   7: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_absent_table::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:570:14
+   8: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+   9: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+  10: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:778:70
+  11: tokio::task::coop::with_budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:167:5
+  12: tokio::task::coop::budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:133:5
+  13: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:778:25
+  14: tokio::runtime::scheduler::current_thread::Context::enter
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:451:19
+  15: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:777:44
+  16: tokio::runtime::scheduler::current_thread::CoreGuard::enter::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:865:68
+  17: tokio::runtime::context::scoped::Scoped&lt;T&gt;::set
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/scoped.rs:40:9
+  18: tokio::runtime::context::set_scheduler::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context.rs:181:38
+  19: std::thread::local::LocalKey&lt;T&gt;::try_with
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/thread/local.rs:462:12
+  20: std::thread::local::LocalKey&lt;T&gt;::with
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/thread/local.rs:426:20
+  21: tokio::runtime::context::set_scheduler
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context.rs:181:17
+  22: tokio::runtime::scheduler::current_thread::CoreGuard::enter
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:865:27
+  23: tokio::runtime::scheduler::current_thread::CoreGuard::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:765:24
+  24: tokio::runtime::scheduler::current_thread::CurrentThread::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:205:33
+  25: tokio::runtime::context::runtime::enter_runtime
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/runtime.rs:65:16
+  26: tokio::runtime::scheduler::current_thread::CurrentThread::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:193:9
+  27: tokio::runtime::runtime::Runtime::block_on_inner
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:371:52
+  28: tokio::runtime::runtime::Runtime::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:345:18
+  29: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_absent_table
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:586:58
+  30: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_absent_table::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:538:63
+  31: core::ops::function::FnOnce::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+  32: &lt;fn() -&gt; core::result::Result&lt;(), alloc::string::String&gt; as core::ops::function::FnOnce&lt;()&gt;&gt;::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.</failure>
+            <system-out>
+running 1 test
+test ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_absent_table ... FAILED
+
+failures:
+
+failures:
+    ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_absent_table
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 609 filtered out; finished in 0.52s
+
+</system-out>
+            <system-err>
+thread &apos;ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_absent_table&apos; (2708) panicked at src/common/meta/src/ddl_manager.rs:1004:41:
+not yet implemented
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/panicking.rs:689:5
+   1: core::panicking::panic_fmt
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:80:14
+   2: core::panicking::panic
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:150:5
+   3: common_meta::ddl_manager::DdlManager::submit_ddl_task::{{closure}}::{{closure}}
+             at ./src/ddl_manager.rs:1004:41
+   4: &lt;tracing::instrument::Instrumented&lt;T&gt; as core::future::future::Future&gt;::poll
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tracing-0.1.44/src/instrument.rs:321:15
+   5: common_meta::ddl_manager::DdlManager::submit_ddl_task::{{closure}}
+             at ./src/ddl_manager.rs:1069:10
+   6: common_meta::ddl::tests::batch_drop_logical_tables::submit::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:369:10
+   7: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_absent_table::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:570:14
+   8: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+   9: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+  10: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:778:70
+  11: tokio::task::coop::with_budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:167:5
+  12: tokio::task::coop::budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:133:5
+  13: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:778:25
+  14: tokio::runtime::scheduler::current_thread::Context::enter
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:451:19
+  15: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:777:44
+  16: tokio::runtime::scheduler::current_thread::CoreGuard::enter::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:865:68
+  17: tokio::runtime::context::scoped::Scoped&lt;T&gt;::set
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/scoped.rs:40:9
+  18: tokio::runtime::context::set_scheduler::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context.rs:181:38
+  19: std::thread::local::LocalKey&lt;T&gt;::try_with
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/thread/local.rs:462:12
+  20: std::thread::local::LocalKey&lt;T&gt;::with
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/thread/local.rs:426:20
+  21: tokio::runtime::context::set_scheduler
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context.rs:181:17
+  22: tokio::runtime::scheduler::current_thread::CoreGuard::enter
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:865:27
+  23: tokio::runtime::scheduler::current_thread::CoreGuard::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:765:24
+  24: tokio::runtime::scheduler::current_thread::CurrentThread::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:205:33
+  25: tokio::runtime::context::runtime::enter_runtime
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/runtime.rs:65:16
+  26: tokio::runtime::scheduler::current_thread::CurrentThread::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:193:9
+  27: tokio::runtime::runtime::Runtime::block_on_inner
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:371:52
+  28: tokio::runtime::runtime::Runtime::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:345:18
+  29: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_absent_table
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:586:58
+  30: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_absent_table::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:538:63
+  31: core::ops::function::FnOnce::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+  32: &lt;fn() -&gt; core::result::Result&lt;(), alloc::string::String&gt; as core::ops::function::FnOnce&lt;()&gt;&gt;::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+</system-err>
+        </testcase>
+        <testcase name="ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables" classname="common-meta" timestamp="2026-09-28T09:45:14.752+00:00" time="0.575">
+            <failure message="thread &apos;ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables&apos; (2707) panicked at src/common/meta/src/ddl_manager.rs:1004:41" type="test failure with exit code 101">thread &apos;ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables&apos; (2707) panicked at src/common/meta/src/ddl_manager.rs:1004:41:
+not yet implemented
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/panicking.rs:689:5
+   1: core::panicking::panic_fmt
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:80:14
+   2: core::panicking::panic
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:150:5
+   3: common_meta::ddl_manager::DdlManager::submit_ddl_task::{{closure}}::{{closure}}
+             at ./src/ddl_manager.rs:1004:41
+   4: &lt;tracing::instrument::Instrumented&lt;T&gt; as core::future::future::Future&gt;::poll
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tracing-0.1.44/src/instrument.rs:321:15
+   5: common_meta::ddl_manager::DdlManager::submit_ddl_task::{{closure}}
+             at ./src/ddl_manager.rs:1069:10
+   6: common_meta::ddl::tests::batch_drop_logical_tables::submit::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:369:10
+   7: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:449:6
+   8: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+   9: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+  10: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:778:70
+  11: tokio::task::coop::with_budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:167:5
+  12: tokio::task::coop::budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:133:5
+  13: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:778:25
+  14: tokio::runtime::scheduler::current_thread::Context::enter
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:451:19
+  15: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:777:44
+  16: tokio::runtime::scheduler::current_thread::CoreGuard::enter::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:865:68
+  17: tokio::runtime::context::scoped::Scoped&lt;T&gt;::set
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/scoped.rs:40:9
+  18: tokio::runtime::context::set_scheduler::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context.rs:181:38
+  19: std::thread::local::LocalKey&lt;T&gt;::try_with
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/thread/local.rs:462:12
+  20: std::thread::local::LocalKey&lt;T&gt;::with
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/thread/local.rs:426:20
+  21: tokio::runtime::context::set_scheduler
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context.rs:181:17
+  22: tokio::runtime::scheduler::current_thread::CoreGuard::enter
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:865:27
+  23: tokio::runtime::scheduler::current_thread::CoreGuard::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:765:24
+  24: tokio::runtime::scheduler::current_thread::CurrentThread::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:205:33
+  25: tokio::runtime::context::runtime::enter_runtime
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/runtime.rs:65:16
+  26: tokio::runtime::scheduler::current_thread::CurrentThread::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:193:9
+  27: tokio::runtime::runtime::Runtime::block_on_inner
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:371:52
+  28: tokio::runtime::runtime::Runtime::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:345:18
+  29: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:467:48
+  30: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:434:42
+  31: core::ops::function::FnOnce::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+  32: &lt;fn() -&gt; core::result::Result&lt;(), alloc::string::String&gt; as core::ops::function::FnOnce&lt;()&gt;&gt;::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.</failure>
+            <system-out>
+running 1 test
+test ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables ... FAILED
+
+failures:
+
+failures:
+    ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 609 filtered out; finished in 0.55s
+
+</system-out>
+            <system-err>
+thread &apos;ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables&apos; (2707) panicked at src/common/meta/src/ddl_manager.rs:1004:41:
+not yet implemented
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/panicking.rs:689:5
+   1: core::panicking::panic_fmt
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:80:14
+   2: core::panicking::panic
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:150:5
+   3: common_meta::ddl_manager::DdlManager::submit_ddl_task::{{closure}}::{{closure}}
+             at ./src/ddl_manager.rs:1004:41
+   4: &lt;tracing::instrument::Instrumented&lt;T&gt; as core::future::future::Future&gt;::poll
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tracing-0.1.44/src/instrument.rs:321:15
+   5: common_meta::ddl_manager::DdlManager::submit_ddl_task::{{closure}}
+             at ./src/ddl_manager.rs:1069:10
+   6: common_meta::ddl::tests::batch_drop_logical_tables::submit::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:369:10
+   7: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:449:6
+   8: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+   9: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+  10: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:778:70
+  11: tokio::task::coop::with_budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:167:5
+  12: tokio::task::coop::budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:133:5
+  13: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:778:25
+  14: tokio::runtime::scheduler::current_thread::Context::enter
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:451:19
+  15: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:777:44
+  16: tokio::runtime::scheduler::current_thread::CoreGuard::enter::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:865:68
+  17: tokio::runtime::context::scoped::Scoped&lt;T&gt;::set
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/scoped.rs:40:9
+  18: tokio::runtime::context::set_scheduler::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context.rs:181:38
+  19: std::thread::local::LocalKey&lt;T&gt;::try_with
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/thread/local.rs:462:12
+  20: std::thread::local::LocalKey&lt;T&gt;::with
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/thread/local.rs:426:20
+  21: tokio::runtime::context::set_scheduler
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context.rs:181:17
+  22: tokio::runtime::scheduler::current_thread::CoreGuard::enter
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:865:27
+  23: tokio::runtime::scheduler::current_thread::CoreGuard::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:765:24
+  24: tokio::runtime::scheduler::current_thread::CurrentThread::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:205:33
+  25: tokio::runtime::context::runtime::enter_runtime
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/runtime.rs:65:16
+  26: tokio::runtime::scheduler::current_thread::CurrentThread::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:193:9
+  27: tokio::runtime::runtime::Runtime::block_on_inner
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:371:52
+  28: tokio::runtime::runtime::Runtime::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:345:18
+  29: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:467:48
+  30: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:434:42
+  31: core::ops::function::FnOnce::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+  32: &lt;fn() -&gt; core::result::Result&lt;(), alloc::string::String&gt; as core::ops::function::FnOnce&lt;()&gt;&gt;::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+</system-err>
+        </testcase>
+        <testcase name="ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_recovers_after_restart" classname="common-meta" timestamp="2026-09-28T09:45:14.753+00:00" time="0.589">
+            <failure message="thread &apos;ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_recovers_after_restart&apos; (2709) panicked at src/common/meta/src/ddl/tests/batch_drop_logical_tables.rs:765:17" type="test failure with exit code 101">thread &apos;ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_recovers_after_restart&apos; (2709) panicked at src/common/meta/src/ddl/tests/batch_drop_logical_tables.rs:765:17:
+the batch finished before any region is dropped: Err(JoinError::Panic(Id(20), &quot;not yet implemented&quot;, ...))
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/panicking.rs:689:5
+   1: core::panicking::panic_fmt
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:80:14
+   2: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_recovers_after_restart::{{closure}}::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:765:17
+   3: &lt;tokio::time::timeout::Timeout&lt;T&gt; as core::future::future::Future&gt;::poll
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/time/timeout.rs:217:42
+   4: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_recovers_after_restart::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:769:6
+   5: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+   6: tokio::runtime::park::CachedParkThread::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/park.rs:284:71
+   7: tokio::task::coop::with_budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:167:5
+   8: tokio::task::coop::budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:133:5
+   9: tokio::runtime::park::CachedParkThread::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/park.rs:284:31
+  10: tokio::runtime::context::blocking::BlockingRegionGuard::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/blocking.rs:66:14
+  11: tokio::runtime::scheduler::multi_thread::MultiThread::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/multi_thread/mod.rs:92:22
+  12: tokio::runtime::context::runtime::enter_runtime
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/runtime.rs:65:16
+  13: tokio::runtime::scheduler::multi_thread::MultiThread::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/multi_thread/mod.rs:91:9
+  14: tokio::runtime::runtime::Runtime::block_on_inner
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:373:50
+  15: tokio::runtime::runtime::Runtime::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:345:18
+  16: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_recovers_after_restart
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:814:48
+  17: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_recovers_after_restart::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:733:65
+  18: core::ops::function::FnOnce::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+  19: &lt;fn() -&gt; core::result::Result&lt;(), alloc::string::String&gt; as core::ops::function::FnOnce&lt;()&gt;&gt;::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.</failure>
+            <system-out>
+running 1 test
+test ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_recovers_after_restart ... FAILED
+
+failures:
+
+failures:
+    ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_recovers_after_restart
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 609 filtered out; finished in 0.55s
+
+</system-out>
+            <system-err>
+thread &apos;tokio-rt-worker&apos; (2713) panicked at src/common/meta/src/ddl_manager.rs:1004:41:
+not yet implemented
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/panicking.rs:689:5
+   1: core::panicking::panic_fmt
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:80:14
+   2: core::panicking::panic
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:150:5
+   3: common_meta::ddl_manager::DdlManager::submit_ddl_task::{{closure}}::{{closure}}
+             at ./src/ddl_manager.rs:1004:41
+   4: &lt;tracing::instrument::Instrumented&lt;T&gt; as core::future::future::Future&gt;::poll
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tracing-0.1.44/src/instrument.rs:321:15
+   5: common_meta::ddl_manager::DdlManager::submit_ddl_task::{{closure}}
+             at ./src/ddl_manager.rs:1069:10
+   6: common_meta::ddl::tests::batch_drop_logical_tables::submit::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:369:10
+   7: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_recovers_after_restart::{{closure}}::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:756:14
+   8: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+   9: tokio::runtime::task::core::Core&lt;T,S&gt;::poll::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/task/core.rs:375:24
+  10: tokio::loom::std::unsafe_cell::UnsafeCell&lt;T&gt;::with_mut
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/loom/std/unsafe_cell.rs:16:9
+  11: tokio::runtime::task::core::Core&lt;T,S&gt;::poll
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/task/core.rs:364:30
+  12: tokio::runtime::task::harness::poll_future::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/task/harness.rs:535:30
+  13: &lt;core::panic::unwind_safe::AssertUnwindSafe&lt;F&gt; as core::ops::function::FnOnce&lt;()&gt;&gt;::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panic/unwind_safe.rs:275:9
+  14: std::panicking::catch_unwind::do_call
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/panicking.rs:581:40
+  15: __rust_try
+  16: std::panicking::catch_unwind
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/panicking.rs:544:19
+  17: std::panic::catch_unwind
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/panic.rs:359:14
+  18: tokio::runtime::task::harness::poll_future
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/task/harness.rs:523:18
+  19: tokio::runtime::task::harness::Harness&lt;T,S&gt;::poll_inner
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/task/harness.rs:210:27
+  20: tokio::runtime::task::harness::Harness&lt;T,S&gt;::poll
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/task/harness.rs:155:20
+  21: tokio::runtime::task::raw::poll
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/task/raw.rs:337:13
+  22: tokio::runtime::task::raw::RawTask::poll
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/task/raw.rs:267:18
+  23: tokio::runtime::task::LocalNotified&lt;S&gt;::run
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/task/mod.rs:510:13
+  24: tokio::runtime::scheduler::multi_thread::worker::Context::run_task::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/multi_thread/worker.rs:684:18
+  25: tokio::task::coop::with_budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:167:5
+  26: tokio::task::coop::budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:133:5
+  27: tokio::runtime::scheduler::multi_thread::worker::Context::run_task
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/multi_thread/worker.rs:675:9
+  28: tokio::runtime::scheduler::multi_thread::worker::Context::run
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/multi_thread/worker.rs:585:29
+  29: tokio::runtime::scheduler::multi_thread::worker::run::{{closure}}::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/multi_thread/worker.rs:550:24
+  30: tokio::runtime::context::scoped::Scoped&lt;T&gt;::set
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/scoped.rs:40:9
+  31: tokio::runtime::context::set_scheduler::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context.rs:181:38
+  32: std::thread::local::LocalKey&lt;T&gt;::try_with
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/thread/local.rs:462:12
+  33: std::thread::local::LocalKey&lt;T&gt;::with
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/thread/local.rs:426:20
+  34: tokio::runtime::context::set_scheduler
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context.rs:181:17
+  35: tokio::runtime::scheduler::multi_thread::worker::run::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/multi_thread/worker.rs:545:9
+  36: tokio::runtime::context::runtime::enter_runtime
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/runtime.rs:65:16
+  37: tokio::runtime::scheduler::multi_thread::worker::run
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/multi_thread/worker.rs:537:5
+  38: tokio::runtime::scheduler::multi_thread::worker::Launch::launch::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/multi_thread/worker.rs:503:45
+  39: &lt;tokio::runtime::blocking::task::BlockingTask&lt;T&gt; as core::future::future::Future&gt;::poll
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/blocking/task.rs:42:21
+  40: tokio::runtime::task::core::Core&lt;T,S&gt;::poll::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/task/core.rs:375:24
+  41: tokio::loom::std::unsafe_cell::UnsafeCell&lt;T&gt;::with_mut
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/loom/std/unsafe_cell.rs:16:9
+  42: tokio::runtime::task::core::Core&lt;T,S&gt;::poll
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/task/core.rs:364:30
+  43: tokio::runtime::task::harness::poll_future::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/task/harness.rs:535:30
+  44: &lt;core::panic::unwind_safe::AssertUnwindSafe&lt;F&gt; as core::ops::function::FnOnce&lt;()&gt;&gt;::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panic/unwind_safe.rs:275:9
+  45: std::panicking::catch_unwind::do_call
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/panicking.rs:581:40
+  46: __rust_try
+  47: std::panicking::catch_unwind
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/panicking.rs:544:19
+  48: std::panic::catch_unwind
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/panic.rs:359:14
+  49: tokio::runtime::task::harness::poll_future
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/task/harness.rs:523:18
+  50: tokio::runtime::task::harness::Harness&lt;T,S&gt;::poll_inner
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/task/harness.rs:210:27
+  51: tokio::runtime::task::harness::Harness&lt;T,S&gt;::poll
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/task/harness.rs:155:20
+  52: tokio::runtime::task::raw::poll
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/task/raw.rs:337:13
+  53: tokio::runtime::task::raw::RawTask::poll
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/task/raw.rs:267:18
+  54: tokio::runtime::task::UnownedTask&lt;S&gt;::run
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/task/mod.rs:547:13
+  55: tokio::runtime::blocking::pool::Task::run
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/blocking/pool.rs:161:19
+  56: tokio::runtime::blocking::pool::Inner::run
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/blocking/pool.rs:518:22
+  57: tokio::runtime::blocking::pool::Spawner::spawn_thread::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/blocking/pool.rs:474:47
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+
+thread &apos;ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_recovers_after_restart&apos; (2709) panicked at src/common/meta/src/ddl/tests/batch_drop_logical_tables.rs:765:17:
+the batch finished before any region is dropped: Err(JoinError::Panic(Id(20), &quot;not yet implemented&quot;, ...))
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/panicking.rs:689:5
+   1: core::panicking::panic_fmt
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:80:14
+   2: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_recovers_after_restart::{{closure}}::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:765:17
+   3: &lt;tokio::time::timeout::Timeout&lt;T&gt; as core::future::future::Future&gt;::poll
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/time/timeout.rs:217:42
+   4: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_recovers_after_restart::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:769:6
+   5: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+   6: tokio::runtime::park::CachedParkThread::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/park.rs:284:71
+   7: tokio::task::coop::with_budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:167:5
+   8: tokio::task::coop::budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:133:5
+   9: tokio::runtime::park::CachedParkThread::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/park.rs:284:31
+  10: tokio::runtime::context::blocking::BlockingRegionGuard::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/blocking.rs:66:14
+  11: tokio::runtime::scheduler::multi_thread::MultiThread::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/multi_thread/mod.rs:92:22
+  12: tokio::runtime::context::runtime::enter_runtime
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/runtime.rs:65:16
+  13: tokio::runtime::scheduler::multi_thread::MultiThread::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/multi_thread/mod.rs:91:9
+  14: tokio::runtime::runtime::Runtime::block_on_inner
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:373:50
+  15: tokio::runtime::runtime::Runtime::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:345:18
+  16: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_recovers_after_restart
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:814:48
+  17: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_recovers_after_restart::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:733:65
+  18: core::ops::function::FnOnce::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+  19: &lt;fn() -&gt; core::result::Result&lt;(), alloc::string::String&gt; as core::ops::function::FnOnce&lt;()&gt;&gt;::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+</system-err>
+        </testcase>
+        <testcase name="ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_non_logical_tables" classname="common-meta" timestamp="2026-09-28T09:45:15.319+00:00" time="0.526">
+            <failure message="thread &apos;ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_non_logical_tables&apos; (2786) panicked at src/common/meta/src/ddl_manager.rs:1004:41" type="test failure with exit code 101">thread &apos;ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_non_logical_tables&apos; (2786) panicked at src/common/meta/src/ddl_manager.rs:1004:41:
+not yet implemented
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/panicking.rs:689:5
+   1: core::panicking::panic_fmt
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:80:14
+   2: core::panicking::panic
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:150:5
+   3: common_meta::ddl_manager::DdlManager::submit_ddl_task::{{closure}}::{{closure}}
+             at ./src/ddl_manager.rs:1004:41
+   4: &lt;tracing::instrument::Instrumented&lt;T&gt; as core::future::future::Future&gt;::poll
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tracing-0.1.44/src/instrument.rs:321:15
+   5: common_meta::ddl_manager::DdlManager::submit_ddl_task::{{closure}}
+             at ./src/ddl_manager.rs:1069:10
+   6: common_meta::ddl::tests::batch_drop_logical_tables::submit::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:369:10
+   7: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_non_logical_tables::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:672:14
+   8: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+   9: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+  10: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:778:70
+  11: tokio::task::coop::with_budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:167:5
+  12: tokio::task::coop::budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:133:5
+  13: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:778:25
+  14: tokio::runtime::scheduler::current_thread::Context::enter
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:451:19
+  15: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:777:44
+  16: tokio::runtime::scheduler::current_thread::CoreGuard::enter::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:865:68
+  17: tokio::runtime::context::scoped::Scoped&lt;T&gt;::set
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/scoped.rs:40:9
+  18: tokio::runtime::context::set_scheduler::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context.rs:181:38
+  19: std::thread::local::LocalKey&lt;T&gt;::try_with
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/thread/local.rs:462:12
+  20: std::thread::local::LocalKey&lt;T&gt;::with
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/thread/local.rs:426:20
+  21: tokio::runtime::context::set_scheduler
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context.rs:181:17
+  22: tokio::runtime::scheduler::current_thread::CoreGuard::enter
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:865:27
+  23: tokio::runtime::scheduler::current_thread::CoreGuard::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:765:24
+  24: tokio::runtime::scheduler::current_thread::CurrentThread::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:205:33
+  25: tokio::runtime::context::runtime::enter_runtime
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/runtime.rs:65:16
+  26: tokio::runtime::scheduler::current_thread::CurrentThread::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:193:9
+  27: tokio::runtime::runtime::Runtime::block_on_inner
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:371:52
+  28: tokio::runtime::runtime::Runtime::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:345:18
+  29: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_non_logical_tables
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:689:58
+  30: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_non_logical_tables::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:636:69
+  31: core::ops::function::FnOnce::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+  32: &lt;fn() -&gt; core::result::Result&lt;(), alloc::string::String&gt; as core::ops::function::FnOnce&lt;()&gt;&gt;::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.</failure>
+            <system-out>
+running 1 test
+test ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_non_logical_tables ... FAILED
+
+failures:
+
+failures:
+    ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_non_logical_tables
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 609 filtered out; finished in 0.49s
+
+</system-out>
+            <system-err>
+thread &apos;ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_non_logical_tables&apos; (2786) panicked at src/common/meta/src/ddl_manager.rs:1004:41:
+not yet implemented
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/panicking.rs:689:5
+   1: core::panicking::panic_fmt
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:80:14
+   2: core::panicking::panic
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:150:5
+   3: common_meta::ddl_manager::DdlManager::submit_ddl_task::{{closure}}::{{closure}}
+             at ./src/ddl_manager.rs:1004:41
+   4: &lt;tracing::instrument::Instrumented&lt;T&gt; as core::future::future::Future&gt;::poll
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tracing-0.1.44/src/instrument.rs:321:15
+   5: common_meta::ddl_manager::DdlManager::submit_ddl_task::{{closure}}
+             at ./src/ddl_manager.rs:1069:10
+   6: common_meta::ddl::tests::batch_drop_logical_tables::submit::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:369:10
+   7: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_non_logical_tables::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:672:14
+   8: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+   9: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+  10: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:778:70
+  11: tokio::task::coop::with_budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:167:5
+  12: tokio::task::coop::budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:133:5
+  13: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:778:25
+  14: tokio::runtime::scheduler::current_thread::Context::enter
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:451:19
+  15: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:777:44
+  16: tokio::runtime::scheduler::current_thread::CoreGuard::enter::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:865:68
+  17: tokio::runtime::context::scoped::Scoped&lt;T&gt;::set
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/scoped.rs:40:9
+  18: tokio::runtime::context::set_scheduler::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context.rs:181:38
+  19: std::thread::local::LocalKey&lt;T&gt;::try_with
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/thread/local.rs:462:12
+  20: std::thread::local::LocalKey&lt;T&gt;::with
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/thread/local.rs:426:20
+  21: tokio::runtime::context::set_scheduler
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context.rs:181:17
+  22: tokio::runtime::scheduler::current_thread::CoreGuard::enter
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:865:27
+  23: tokio::runtime::scheduler::current_thread::CoreGuard::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:765:24
+  24: tokio::runtime::scheduler::current_thread::CurrentThread::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:205:33
+  25: tokio::runtime::context::runtime::enter_runtime
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/runtime.rs:65:16
+  26: tokio::runtime::scheduler::current_thread::CurrentThread::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:193:9
+  27: tokio::runtime::runtime::Runtime::block_on_inner
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:371:52
+  28: tokio::runtime::runtime::Runtime::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:345:18
+  29: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_non_logical_tables
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:689:58
+  30: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_non_logical_tables::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:636:69
+  31: core::ops::function::FnOnce::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+  32: &lt;fn() -&gt; core::result::Result&lt;(), alloc::string::String&gt; as core::ops::function::FnOnce&lt;()&gt;&gt;::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+</system-err>
+        </testcase>
+        <testcase name="ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_different_physical_tables" classname="common-meta" timestamp="2026-09-28T09:45:15.319+00:00" time="0.527">
+            <failure message="thread &apos;ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_different_physical_tables&apos; (2785) panicked at src/common/meta/src/ddl_manager.rs:1004:41" type="test failure with exit code 101">thread &apos;ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_different_physical_tables&apos; (2785) panicked at src/common/meta/src/ddl_manager.rs:1004:41:
+not yet implemented
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/panicking.rs:689:5
+   1: core::panicking::panic_fmt
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:80:14
+   2: core::panicking::panic
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:150:5
+   3: common_meta::ddl_manager::DdlManager::submit_ddl_task::{{closure}}::{{closure}}
+             at ./src/ddl_manager.rs:1004:41
+   4: &lt;tracing::instrument::Instrumented&lt;T&gt; as core::future::future::Future&gt;::poll
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tracing-0.1.44/src/instrument.rs:321:15
+   5: common_meta::ddl_manager::DdlManager::submit_ddl_task::{{closure}}
+             at ./src/ddl_manager.rs:1069:10
+   6: common_meta::ddl::tests::batch_drop_logical_tables::submit::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:369:10
+   7: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_different_physical_tables::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:616:14
+   8: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+   9: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+  10: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:778:70
+  11: tokio::task::coop::with_budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:167:5
+  12: tokio::task::coop::budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:133:5
+  13: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:778:25
+  14: tokio::runtime::scheduler::current_thread::Context::enter
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:451:19
+  15: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:777:44
+  16: tokio::runtime::scheduler::current_thread::CoreGuard::enter::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:865:68
+  17: tokio::runtime::context::scoped::Scoped&lt;T&gt;::set
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/scoped.rs:40:9
+  18: tokio::runtime::context::set_scheduler::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context.rs:181:38
+  19: std::thread::local::LocalKey&lt;T&gt;::try_with
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/thread/local.rs:462:12
+  20: std::thread::local::LocalKey&lt;T&gt;::with
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/thread/local.rs:426:20
+  21: tokio::runtime::context::set_scheduler
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context.rs:181:17
+  22: tokio::runtime::scheduler::current_thread::CoreGuard::enter
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:865:27
+  23: tokio::runtime::scheduler::current_thread::CoreGuard::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:765:24
+  24: tokio::runtime::scheduler::current_thread::CurrentThread::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:205:33
+  25: tokio::runtime::context::runtime::enter_runtime
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/runtime.rs:65:16
+  26: tokio::runtime::scheduler::current_thread::CurrentThread::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:193:9
+  27: tokio::runtime::runtime::Runtime::block_on_inner
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:371:52
+  28: tokio::runtime::runtime::Runtime::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:345:18
+  29: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_different_physical_tables
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:632:58
+  30: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_different_physical_tables::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:590:76
+  31: core::ops::function::FnOnce::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+  32: &lt;fn() -&gt; core::result::Result&lt;(), alloc::string::String&gt; as core::ops::function::FnOnce&lt;()&gt;&gt;::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.</failure>
+            <system-out>
+running 1 test
+test ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_different_physical_tables ... FAILED
+
+failures:
+
+failures:
+    ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_different_physical_tables
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 609 filtered out; finished in 0.50s
+
+</system-out>
+            <system-err>
+thread &apos;ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_different_physical_tables&apos; (2785) panicked at src/common/meta/src/ddl_manager.rs:1004:41:
+not yet implemented
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/panicking.rs:689:5
+   1: core::panicking::panic_fmt
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:80:14
+   2: core::panicking::panic
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:150:5
+   3: common_meta::ddl_manager::DdlManager::submit_ddl_task::{{closure}}::{{closure}}
+             at ./src/ddl_manager.rs:1004:41
+   4: &lt;tracing::instrument::Instrumented&lt;T&gt; as core::future::future::Future&gt;::poll
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tracing-0.1.44/src/instrument.rs:321:15
+   5: common_meta::ddl_manager::DdlManager::submit_ddl_task::{{closure}}
+             at ./src/ddl_manager.rs:1069:10
+   6: common_meta::ddl::tests::batch_drop_logical_tables::submit::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:369:10
+   7: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_different_physical_tables::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:616:14
+   8: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+   9: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+  10: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:778:70
+  11: tokio::task::coop::with_budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:167:5
+  12: tokio::task::coop::budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:133:5
+  13: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:778:25
+  14: tokio::runtime::scheduler::current_thread::Context::enter
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:451:19
+  15: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:777:44
+  16: tokio::runtime::scheduler::current_thread::CoreGuard::enter::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:865:68
+  17: tokio::runtime::context::scoped::Scoped&lt;T&gt;::set
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/scoped.rs:40:9
+  18: tokio::runtime::context::set_scheduler::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context.rs:181:38
+  19: std::thread::local::LocalKey&lt;T&gt;::try_with
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/thread/local.rs:462:12
+  20: std::thread::local::LocalKey&lt;T&gt;::with
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/thread/local.rs:426:20
+  21: tokio::runtime::context::set_scheduler
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context.rs:181:17
+  22: tokio::runtime::scheduler::current_thread::CoreGuard::enter
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:865:27
+  23: tokio::runtime::scheduler::current_thread::CoreGuard::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:765:24
+  24: tokio::runtime::scheduler::current_thread::CurrentThread::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:205:33
+  25: tokio::runtime::context::runtime::enter_runtime
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/runtime.rs:65:16
+  26: tokio::runtime::scheduler::current_thread::CurrentThread::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:193:9
+  27: tokio::runtime::runtime::Runtime::block_on_inner
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:371:52
+  28: tokio::runtime::runtime::Runtime::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:345:18
+  29: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_different_physical_tables
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:632:58
+  30: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_rejects_different_physical_tables::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:590:76
+  31: core::ops::function::FnOnce::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+  32: &lt;fn() -&gt; core::result::Result&lt;(), alloc::string::String&gt; as core::ops::function::FnOnce&lt;()&gt;&gt;::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+</system-err>
+        </testcase>
+        <testcase name="ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_skips_absent_table_if_exists" classname="common-meta" timestamp="2026-09-28T09:45:15.328+00:00" time="0.519">
+            <failure message="thread &apos;ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_skips_absent_table_if_exists&apos; (2821) panicked at src/common/meta/src/ddl_manager.rs:1004:41" type="test failure with exit code 101">thread &apos;ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_skips_absent_table_if_exists&apos; (2821) panicked at src/common/meta/src/ddl_manager.rs:1004:41:
+not yet implemented
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/panicking.rs:689:5
+   1: core::panicking::panic_fmt
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:80:14
+   2: core::panicking::panic
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:150:5
+   3: common_meta::ddl_manager::DdlManager::submit_ddl_task::{{closure}}::{{closure}}
+             at ./src/ddl_manager.rs:1004:41
+   4: &lt;tracing::instrument::Instrumented&lt;T&gt; as core::future::future::Future&gt;::poll
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tracing-0.1.44/src/instrument.rs:321:15
+   5: common_meta::ddl_manager::DdlManager::submit_ddl_task::{{closure}}
+             at ./src/ddl_manager.rs:1069:10
+   6: common_meta::ddl::tests::batch_drop_logical_tables::submit::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:369:10
+   7: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_skips_absent_table_if_exists::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:509:6
+   8: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+   9: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+  10: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:778:70
+  11: tokio::task::coop::with_budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:167:5
+  12: tokio::task::coop::budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:133:5
+  13: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:778:25
+  14: tokio::runtime::scheduler::current_thread::Context::enter
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:451:19
+  15: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:777:44
+  16: tokio::runtime::scheduler::current_thread::CoreGuard::enter::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:865:68
+  17: tokio::runtime::context::scoped::Scoped&lt;T&gt;::set
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/scoped.rs:40:9
+  18: tokio::runtime::context::set_scheduler::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context.rs:181:38
+  19: std::thread::local::LocalKey&lt;T&gt;::try_with
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/thread/local.rs:462:12
+  20: std::thread::local::LocalKey&lt;T&gt;::with
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/thread/local.rs:426:20
+  21: tokio::runtime::context::set_scheduler
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context.rs:181:17
+  22: tokio::runtime::scheduler::current_thread::CoreGuard::enter
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:865:27
+  23: tokio::runtime::scheduler::current_thread::CoreGuard::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:765:24
+  24: tokio::runtime::scheduler::current_thread::CurrentThread::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:205:33
+  25: tokio::runtime::context::runtime::enter_runtime
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/runtime.rs:65:16
+  26: tokio::runtime::scheduler::current_thread::CurrentThread::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:193:9
+  27: tokio::runtime::runtime::Runtime::block_on_inner
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:371:52
+  28: tokio::runtime::runtime::Runtime::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:345:18
+  29: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_skips_absent_table_if_exists
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:534:6
+  30: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_skips_absent_table_if_exists::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:490:71
+  31: core::ops::function::FnOnce::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+  32: &lt;fn() -&gt; core::result::Result&lt;(), alloc::string::String&gt; as core::ops::function::FnOnce&lt;()&gt;&gt;::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.</failure>
+            <system-out>
+running 1 test
+test ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_skips_absent_table_if_exists ... FAILED
+
+failures:
+
+failures:
+    ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_skips_absent_table_if_exists
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 609 filtered out; finished in 0.49s
+
+</system-out>
+            <system-err>
+thread &apos;ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_skips_absent_table_if_exists&apos; (2821) panicked at src/common/meta/src/ddl_manager.rs:1004:41:
+not yet implemented
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/panicking.rs:689:5
+   1: core::panicking::panic_fmt
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:80:14
+   2: core::panicking::panic
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:150:5
+   3: common_meta::ddl_manager::DdlManager::submit_ddl_task::{{closure}}::{{closure}}
+             at ./src/ddl_manager.rs:1004:41
+   4: &lt;tracing::instrument::Instrumented&lt;T&gt; as core::future::future::Future&gt;::poll
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tracing-0.1.44/src/instrument.rs:321:15
+   5: common_meta::ddl_manager::DdlManager::submit_ddl_task::{{closure}}
+             at ./src/ddl_manager.rs:1069:10
+   6: common_meta::ddl::tests::batch_drop_logical_tables::submit::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:369:10
+   7: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_skips_absent_table_if_exists::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:509:6
+   8: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+   9: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+  10: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:778:70
+  11: tokio::task::coop::with_budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:167:5
+  12: tokio::task::coop::budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:133:5
+  13: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:778:25
+  14: tokio::runtime::scheduler::current_thread::Context::enter
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:451:19
+  15: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:777:44
+  16: tokio::runtime::scheduler::current_thread::CoreGuard::enter::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:865:68
+  17: tokio::runtime::context::scoped::Scoped&lt;T&gt;::set
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/scoped.rs:40:9
+  18: tokio::runtime::context::set_scheduler::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context.rs:181:38
+  19: std::thread::local::LocalKey&lt;T&gt;::try_with
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/thread/local.rs:462:12
+  20: std::thread::local::LocalKey&lt;T&gt;::with
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/thread/local.rs:426:20
+  21: tokio::runtime::context::set_scheduler
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context.rs:181:17
+  22: tokio::runtime::scheduler::current_thread::CoreGuard::enter
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:865:27
+  23: tokio::runtime::scheduler::current_thread::CoreGuard::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:765:24
+  24: tokio::runtime::scheduler::current_thread::CurrentThread::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:205:33
+  25: tokio::runtime::context::runtime::enter_runtime
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/runtime.rs:65:16
+  26: tokio::runtime::scheduler::current_thread::CurrentThread::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:193:9
+  27: tokio::runtime::runtime::Runtime::block_on_inner
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:371:52
+  28: tokio::runtime::runtime::Runtime::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:345:18
+  29: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_skips_absent_table_if_exists
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:534:6
+  30: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_skips_absent_table_if_exists::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:490:71
+  31: core::ops::function::FnOnce::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+  32: &lt;fn() -&gt; core::result::Result&lt;(), alloc::string::String&gt; as core::ops::function::FnOnce&lt;()&gt;&gt;::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+</system-err>
+        </testcase>
+        <testcase name="ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_with_duplicate_targets" classname="common-meta" timestamp="2026-09-28T09:45:15.343+00:00" time="0.544">
+            <failure message="thread &apos;ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_with_duplicate_targets&apos; (2840) panicked at src/common/meta/src/ddl_manager.rs:1004:41" type="test failure with exit code 101">thread &apos;ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_with_duplicate_targets&apos; (2840) panicked at src/common/meta/src/ddl_manager.rs:1004:41:
+not yet implemented
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/panicking.rs:689:5
+   1: core::panicking::panic_fmt
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:80:14
+   2: core::panicking::panic
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:150:5
+   3: common_meta::ddl_manager::DdlManager::submit_ddl_task::{{closure}}::{{closure}}
+             at ./src/ddl_manager.rs:1004:41
+   4: &lt;tracing::instrument::Instrumented&lt;T&gt; as core::future::future::Future&gt;::poll
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tracing-0.1.44/src/instrument.rs:321:15
+   5: common_meta::ddl_manager::DdlManager::submit_ddl_task::{{closure}}
+             at ./src/ddl_manager.rs:1069:10
+   6: common_meta::ddl::tests::batch_drop_logical_tables::submit::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:369:10
+   7: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_with_duplicate_targets::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:712:6
+   8: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+   9: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+  10: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:778:70
+  11: tokio::task::coop::with_budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:167:5
+  12: tokio::task::coop::budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:133:5
+  13: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:778:25
+  14: tokio::runtime::scheduler::current_thread::Context::enter
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:451:19
+  15: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:777:44
+  16: tokio::runtime::scheduler::current_thread::CoreGuard::enter::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:865:68
+  17: tokio::runtime::context::scoped::Scoped&lt;T&gt;::set
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/scoped.rs:40:9
+  18: tokio::runtime::context::set_scheduler::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context.rs:181:38
+  19: std::thread::local::LocalKey&lt;T&gt;::try_with
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/thread/local.rs:462:12
+  20: std::thread::local::LocalKey&lt;T&gt;::with
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/thread/local.rs:426:20
+  21: tokio::runtime::context::set_scheduler
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context.rs:181:17
+  22: tokio::runtime::scheduler::current_thread::CoreGuard::enter
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:865:27
+  23: tokio::runtime::scheduler::current_thread::CoreGuard::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:765:24
+  24: tokio::runtime::scheduler::current_thread::CurrentThread::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:205:33
+  25: tokio::runtime::context::runtime::enter_runtime
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/runtime.rs:65:16
+  26: tokio::runtime::scheduler::current_thread::CurrentThread::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:193:9
+  27: tokio::runtime::runtime::Runtime::block_on_inner
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:371:52
+  28: tokio::runtime::runtime::Runtime::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:345:18
+  29: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_with_duplicate_targets
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:729:48
+  30: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_with_duplicate_targets::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:693:65
+  31: core::ops::function::FnOnce::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+  32: &lt;fn() -&gt; core::result::Result&lt;(), alloc::string::String&gt; as core::ops::function::FnOnce&lt;()&gt;&gt;::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.</failure>
+            <system-out>
+running 1 test
+test ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_with_duplicate_targets ... FAILED
+
+failures:
+
+failures:
+    ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_with_duplicate_targets
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 609 filtered out; finished in 0.51s
+
+</system-out>
+            <system-err>
+thread &apos;ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_with_duplicate_targets&apos; (2840) panicked at src/common/meta/src/ddl_manager.rs:1004:41:
+not yet implemented
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/panicking.rs:689:5
+   1: core::panicking::panic_fmt
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:80:14
+   2: core::panicking::panic
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/panicking.rs:150:5
+   3: common_meta::ddl_manager::DdlManager::submit_ddl_task::{{closure}}::{{closure}}
+             at ./src/ddl_manager.rs:1004:41
+   4: &lt;tracing::instrument::Instrumented&lt;T&gt; as core::future::future::Future&gt;::poll
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tracing-0.1.44/src/instrument.rs:321:15
+   5: common_meta::ddl_manager::DdlManager::submit_ddl_task::{{closure}}
+             at ./src/ddl_manager.rs:1069:10
+   6: common_meta::ddl::tests::batch_drop_logical_tables::submit::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:369:10
+   7: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_with_duplicate_targets::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:712:6
+   8: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+   9: &lt;core::pin::Pin&lt;P&gt; as core::future::future::Future&gt;::poll
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/future/future.rs:133:9
+  10: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:778:70
+  11: tokio::task::coop::with_budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:167:5
+  12: tokio::task::coop::budget
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/task/coop/mod.rs:133:5
+  13: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:778:25
+  14: tokio::runtime::scheduler::current_thread::Context::enter
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:451:19
+  15: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:777:44
+  16: tokio::runtime::scheduler::current_thread::CoreGuard::enter::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:865:68
+  17: tokio::runtime::context::scoped::Scoped&lt;T&gt;::set
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/scoped.rs:40:9
+  18: tokio::runtime::context::set_scheduler::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context.rs:181:38
+  19: std::thread::local::LocalKey&lt;T&gt;::try_with
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/thread/local.rs:462:12
+  20: std::thread::local::LocalKey&lt;T&gt;::with
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/std/src/thread/local.rs:426:20
+  21: tokio::runtime::context::set_scheduler
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context.rs:181:17
+  22: tokio::runtime::scheduler::current_thread::CoreGuard::enter
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:865:27
+  23: tokio::runtime::scheduler::current_thread::CoreGuard::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:765:24
+  24: tokio::runtime::scheduler::current_thread::CurrentThread::block_on::{{closure}}
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:205:33
+  25: tokio::runtime::context::runtime::enter_runtime
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/context/runtime.rs:65:16
+  26: tokio::runtime::scheduler::current_thread::CurrentThread::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/scheduler/current_thread/mod.rs:193:9
+  27: tokio::runtime::runtime::Runtime::block_on_inner
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:371:52
+  28: tokio::runtime::runtime::Runtime::block_on
+             at /root/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.52.3/src/runtime/runtime.rs:345:18
+  29: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_with_duplicate_targets
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:729:48
+  30: common_meta::ddl::tests::batch_drop_logical_tables::test_batch_drop_logical_tables_with_duplicate_targets::{{closure}}
+             at ./src/ddl/tests/batch_drop_logical_tables.rs:693:65
+  31: core::ops::function::FnOnce::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+  32: &lt;fn() -&gt; core::result::Result&lt;(), alloc::string::String&gt; as core::ops::function::FnOnce&lt;()&gt;&gt;::call_once
+             at /rustc/31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+</system-err>
+        </testcase>
+    </testsuite>
+</testsuites>

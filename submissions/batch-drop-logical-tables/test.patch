@@ -833,24 +833,53 @@ index 0000000000..045a6d554c
 +}
 diff --git a/test.sh b/test.sh
 new file mode 100755
-index 0000000000..1a7c92ee11
+index 0000000000..cf3c53b03a
 --- /dev/null
 +++ b/test.sh
-@@ -0,0 +1,113 @@
+@@ -0,0 +1,143 @@
 +#!/usr/bin/env bash
 +# Runs the common-meta unit tests covering logical table DDL.
 +#
-+# Usage: ./test.sh <base|new> [junit-output-path]
++# Usage: ./test.sh --output_path <junit-xml-path> <base|new>
 +#
 +#   base  existing common-meta unit tests (regression suite)
 +#   new   batch drop of logical tables tests
 +#
-+# The JUnit report is written to the second argument, or to $JUNIT_OUTPUT, or
-+# to test-results/<mode>.xml. Requires cargo-nextest; installs nothing.
++# The JUnit report is written to the --output_path file. Every selected test
++# runs (no fail-fast, no retries). Requires cargo-nextest; installs nothing.
 +
 +set -uo pipefail
 +
-+MODE="${1:-}"
++usage() {
++    echo "usage: $0 --output_path <junit-xml-path> <base|new>" >&2
++    exit 2
++}
++
++OUTPUT_PATH=""
++MODE=""
++while [ $# -gt 0 ]; do
++    case "$1" in
++        --output_path)
++            [ $# -ge 2 ] && [ -n "$2" ] || usage
++            OUTPUT_PATH="$2"
++            shift 2
++            ;;
++        --output_path=*)
++            OUTPUT_PATH="${1#--output_path=}"
++            shift
++            ;;
++        base | new)
++            [ -z "$MODE" ] || usage
++            MODE="$1"
++            shift
++            ;;
++        *)
++            usage
++            ;;
++    esac
++done
++[ -n "$MODE" ] && [ -n "$OUTPUT_PATH" ] || usage
++
 +case "$MODE" in
 +    base)
 +        FILTER='package(common-meta) & kind(lib) & !test(/^ddl::tests::batch_drop_logical_tables::/)'
@@ -858,17 +887,18 @@ index 0000000000..1a7c92ee11
 +    new)
 +        FILTER='package(common-meta) & kind(lib) & test(/^ddl::tests::batch_drop_logical_tables::/)'
 +        ;;
-+    *)
-+        echo "usage: $0 <base|new> [junit-output-path]" >&2
-+        exit 2
-+        ;;
 +esac
++
++# A relative output path is relative to the caller's working directory.
++case "$OUTPUT_PATH" in
++    /*) ;;
++    *) OUTPUT_PATH="$PWD/$OUTPUT_PATH" ;;
++esac
++mkdir -p "$(dirname "$OUTPUT_PATH")" || exit 2
 +
 +ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 +cd "$ROOT" || exit 2
 +
-+JUNIT_OUTPUT="${2:-${JUNIT_OUTPUT:-$ROOT/test-results/$MODE.xml}}"
-+mkdir -p "$(dirname "$JUNIT_OUTPUT")"
 +PROFILE="junit-report"
 +WORK_DIR="$(mktemp -d)"
 +trap 'rm -rf "$WORK_DIR"' EXIT
@@ -906,7 +936,7 @@ index 0000000000..1a7c92ee11
 +        echo "    </testcase>"
 +        echo "  </testsuite>"
 +        echo "</testsuites>"
-+    } > "$JUNIT_OUTPUT"
++    } > "$OUTPUT_PATH"
 +}
 +
 +NEXTEST_ARGS=(
@@ -942,11 +972,11 @@ index 0000000000..1a7c92ee11
 +STATUS="${PIPESTATUS[0]}"
 +
 +if [ -s "$REPORT" ]; then
-+    cp "$REPORT" "$JUNIT_OUTPUT"
++    cp "$REPORT" "$OUTPUT_PATH"
 +else
 +    write_fallback_junit "run" "$WORK_DIR/run.log"
 +    [ "$STATUS" -eq 0 ] && STATUS=1
 +fi
 +
-+echo "test.sh: mode=$MODE status=$STATUS junit=$JUNIT_OUTPUT"
++echo "test.sh: mode=$MODE status=$STATUS junit=$OUTPUT_PATH"
 +exit "$STATUS"
